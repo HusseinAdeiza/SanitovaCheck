@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.*
@@ -38,7 +39,7 @@ import java.util.Locale
 import java.util.UUID
 import com.sanitova.sanitovacheck.ui.theme.*
 
-private enum class ScanStep { LIMIT_REACHED, PERMISSION, CAMERA, FORM, SUBMITTING }
+private enum class ScanStep { LIMIT_REACHED, PERMISSION, CAMERA, VIDEO, FORM, SUBMITTING }
 
 @Composable
 fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
@@ -53,6 +54,11 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
     val canScan = hasProAccess || !FreeScanTracker.hasReachedLimit(context)
     val maxPhotos = if (hasProAccess) 10 else 2
     var photoUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
+    // Video is a Pro-only, optional attachment alongside the photo set (one clip
+    // per scan) — its extracted frames ride the same submission pipeline as photos
+    // but aren't counted against maxPhotos.
+    var videoFrameUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
+    var isExtractingFrames by remember { mutableStateOf(false) }
 
     var step by remember {
         mutableStateOf(
@@ -88,8 +94,9 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
 
         scope.launch {
             try {
+                val allImageUris = photoUris + videoFrameUris
                 val imagesBase64 = withContext(Dispatchers.IO) {
-                    photoUris.mapNotNull { uri -> downsampledBase64FromUri(context, uri) }
+                    allImageUris.mapNotNull { uri -> downsampledBase64FromUri(context, uri) }
                 }
 
                 val response = WashApiClient.service.assess(
@@ -119,7 +126,7 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
                             timestampMillis = System.currentTimeMillis(),
                             location = location,
                             description = description,
-                            photoUriStrings = photoUris.map { it.toString() },
+                            photoUriStrings = allImageUris.map { it.toString() },
                             result = result
                         )
                     )
@@ -196,6 +203,24 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
                     step = ScanStep.FORM
                 },
                 onCancel = { /* stay on camera; Home button handles exit via nav back */ }
+            )
+        }
+
+        ScanStep.VIDEO -> {
+            VideoCapture(
+                onVideoCaptured = { videoUri ->
+                    isExtractingFrames = true
+                    step = ScanStep.FORM
+                    scope.launch {
+                        val frames = withContext(Dispatchers.IO) {
+                            extractVideoFrames(context, videoUri)
+                        }
+                        videoFrameUris = frames
+                        ScanResultStore.lastPhotoUris.value = photoUris + videoFrameUris
+                        isExtractingFrames = false
+                    }
+                },
+                onCancel = { step = ScanStep.FORM }
             )
         }
 
@@ -287,6 +312,61 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.clickable { onRequirePro() }
                         )
+                    }
+                    Spacer(Modifier.height(16.dp))
+
+                    when {
+                        videoFrameUris.isNotEmpty() -> {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Filled.Videocam,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(Modifier.width(6.dp))
+                                Text(
+                                    "Video clip attached (${videoFrameUris.size} frames)",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                TextButton(
+                                    enabled = step != ScanStep.SUBMITTING,
+                                    onClick = {
+                                        videoFrameUris = emptyList()
+                                        ScanResultStore.lastPhotoUris.value = photoUris
+                                    }
+                                ) {
+                                    Text("Remove")
+                                }
+                            }
+                        }
+                        isExtractingFrames -> {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    "Extracting video frames...",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        else -> {
+                            OutlinedButton(
+                                enabled = step != ScanStep.SUBMITTING,
+                                onClick = { if (hasProAccess) step = ScanStep.VIDEO else onRequirePro() },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Icon(Icons.Filled.Videocam, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(8.dp))
+                                Text(if (hasProAccess) "Add a short video clip" else "Add video clip (Pro)")
+                            }
+                        }
                     }
                     Spacer(Modifier.height(16.dp))
 
