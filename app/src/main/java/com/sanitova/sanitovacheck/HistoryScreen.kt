@@ -37,7 +37,7 @@ fun HistoryScreen(onRequirePro: () -> Unit, onOpenRecord: (String) -> Unit) {
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+    Column(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars).padding(24.dp)) {
         Text("Scan History", style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(24.dp))
 

@@ -1,0 +1,40 @@
+# R8 keep rules for reflection-heavy dependencies.
+# AGP 9.3's optimization{} block already includes the default Android platform
+# rules (equivalent to proguard-android-optimize.txt) — this file only covers
+# what R8 can't infer on its own: JSON reflection and third-party SDK internals.
+
+# --- Gson / Retrofit: WASH API request + response models ---
+# Gson sets these fields via reflection using their declared (not obfuscated)
+# JSON names. Without this, R8 can rename or strip fields it sees no direct
+# code reference to, silently breaking (de)serialization against the backend.
+-keep class com.sanitova.sanitovacheck.AssessRequest { *; }
+-keep class com.sanitova.sanitovacheck.AssessResponse { *; }
+-keep class com.sanitova.sanitovacheck.Assessment { *; }
+-keep class com.sanitova.sanitovacheck.Routing { *; }
+-keep class com.sanitova.sanitovacheck.PhotoVerification { *; }
+-keep class com.sanitova.sanitovacheck.ScanRecord { *; }
+-keepclassmembers class com.sanitova.sanitovacheck.** {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+-keepattributes Signature
+-keepattributes *Annotation*
+-keepattributes InnerClasses
+-keepattributes EnclosingMethod
+-keepattributes Exceptions
+
+# Gson's own reflective TypeToken machinery
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken
+
+# Retrofit interface + its suspend/generic method signatures
+-keep interface com.sanitova.sanitovacheck.WashApiService { *; }
+-keepclasseswithmembers interface * {
+    @retrofit2.http.* <methods>;
+}
+
+# --- RevenueCat ---
+# The SDK ships its own consumer-rules.pro inside the AAR (auto-applied), so
+# this is a defensive backstop in case a future version's rules don't cover
+# a class we reflect into indirectly.
+-keep class com.revenuecat.purchases.** { *; }
+-dontwarn com.revenuecat.purchases.**

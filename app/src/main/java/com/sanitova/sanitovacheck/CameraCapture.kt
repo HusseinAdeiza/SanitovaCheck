@@ -71,10 +71,12 @@ fun CameraCapture(
             }
         )
 
-        // Top bar: cancel button
+        // Top bar: cancel button. Preview stays edge-to-edge; only the control
+        // itself is pushed clear of the status bar / camera cutout.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.statusBars)
                 .padding(16.dp),
             horizontalArrangement = Arrangement.Start
         ) {
@@ -83,11 +85,12 @@ fun CameraCapture(
             }
         }
 
-        // Bottom bar: capture button
+        // Bottom bar: capture button. Kept clear of the nav bar, preview stays full-bleed.
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
+                .windowInsetsPadding(WindowInsets.navigationBars)
                 .padding(32.dp),
             contentAlignment = Alignment.Center
         ) {
