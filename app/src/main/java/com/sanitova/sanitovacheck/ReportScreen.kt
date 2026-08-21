@@ -3,6 +3,7 @@ package com.sanitova.sanitovacheck
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.draw.clip
@@ -36,7 +37,7 @@ fun ReportScreen(scanId: String, onRequirePro: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val hasProAccess by SubscriptionRepository.hasProAccess.collectAsState()
     val liveResult by ScanResultStore.lastResult
-    val livePhotoUri by ScanResultStore.lastPhotoUri
+    val livePhotoUris by ScanResultStore.lastPhotoUris
 
     // If this scanId matches the just-completed live scan, use that directly
     // (fastest path, no disk read needed). Otherwise, this is a historical
@@ -47,7 +48,8 @@ fun ReportScreen(scanId: String, onRequirePro: () -> Unit) {
     }
 
     val result = if (isLiveMatch) liveResult else historicalRecord?.result
-    val photoUri = if (isLiveMatch) livePhotoUri else historicalRecord?.photoUriString?.let { android.net.Uri.parse(it) }
+    val photoUris = if (isLiveMatch) livePhotoUris
+        else historicalRecord?.photoUriStrings?.map { android.net.Uri.parse(it) } ?: emptyList()
 
     LaunchedEffect(Unit) {
         SubscriptionRepository.refreshEntitlementStatus()
@@ -56,6 +58,7 @@ fun ReportScreen(scanId: String, onRequirePro: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.systemBars)
             .verticalScroll(rememberScrollState())
             .padding(24.dp)
     ) {
@@ -68,16 +71,36 @@ fun ReportScreen(scanId: String, onRequirePro: () -> Unit) {
         )
         Spacer(Modifier.height(16.dp))
 
-        photoUri?.let { uri ->
-            AsyncImage(
-                model = uri,
-                contentDescription = "Photo captured during assessment",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(16.dp)),
-                contentScale = ContentScale.Crop
-            )
+        if (photoUris.isNotEmpty()) {
+            if (photoUris.size == 1) {
+                AsyncImage(
+                    model = photoUris.first(),
+                    contentDescription = "Photo captured during assessment",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(16.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                ) {
+                    photoUris.forEachIndexed { index, uri ->
+                        AsyncImage(
+                            model = uri,
+                            contentDescription = "Photo ${index + 1} captured during assessment",
+                            modifier = Modifier
+                                .size(160.dp)
+                                .padding(end = if (index < photoUris.lastIndex) 8.dp else 0.dp)
+                                .clip(RoundedCornerShape(16.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+            }
             Spacer(Modifier.height(12.dp))
 
             result?.photoVerification?.let { verification ->

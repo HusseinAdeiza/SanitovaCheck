@@ -9,7 +9,7 @@ data class AssessRequest(
     @SerializedName("incident_description") val incidentDescription: String,
     @SerializedName("reporter_name") val reporterName: String? = null,
     @SerializedName("reported_date") val reportedDate: String? = null,
-    @SerializedName("image_base64") val imageBase64: String? = null
+    @SerializedName("images_base64") val imagesBase64: List<String>? = null
 )
 
 data class AssessResponse(

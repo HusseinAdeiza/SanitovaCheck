@@ -13,7 +13,7 @@ data class ScanRecord(
     val timestampMillis: Long,
     val location: String,
     val description: String,
-    val photoUriString: String?,
+    val photoUriStrings: List<String> = emptyList(),
     val result: AssessResponse
 )
 

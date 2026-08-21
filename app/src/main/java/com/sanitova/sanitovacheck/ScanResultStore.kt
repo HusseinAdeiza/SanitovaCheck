@@ -10,7 +10,7 @@ import androidx.compose.runtime.mutableStateOf
  * database (Room) keyed by scan/case ID.
  */
 object ScanResultStore {
-    var lastPhotoUri = mutableStateOf<Uri?>(null)
+    var lastPhotoUris = mutableStateOf<List<Uri>>(emptyList())
     var lastResult = mutableStateOf<AssessResponse?>(null)
     var lastError = mutableStateOf<String?>(null)
 }

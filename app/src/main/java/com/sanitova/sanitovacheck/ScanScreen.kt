@@ -2,27 +2,35 @@ package com.sanitova.sanitovacheck
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.util.Base64
+import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import coil.compose.AsyncImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.ByteArrayOutputStream
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.text.SimpleDateFormat
@@ -43,6 +51,8 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
     }
 
     val canScan = hasProAccess || !FreeScanTracker.hasReachedLimit(context)
+    val maxPhotos = if (hasProAccess) 10 else 2
+    var photoUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
     var step by remember {
         mutableStateOf(
@@ -78,35 +88,8 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
 
         scope.launch {
             try {
-                val imageBase64 = withContext(Dispatchers.IO) {
-                    ScanResultStore.lastPhotoUri.value?.let { uri ->
-                        try {
-                            val inputStream = context.contentResolver.openInputStream(uri)
-                            val originalBitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
-                            inputStream?.close()
-
-                            val maxDimension = 1024
-                            val scale = minOf(
-                                maxDimension.toFloat() / originalBitmap.width,
-                                maxDimension.toFloat() / originalBitmap.height,
-                                1f
-                            )
-                            val scaledBitmap = android.graphics.Bitmap.createScaledBitmap(
-                                originalBitmap,
-                                (originalBitmap.width * scale).toInt(),
-                                (originalBitmap.height * scale).toInt(),
-                                true
-                            )
-
-                            val outputStream = ByteArrayOutputStream()
-                            scaledBitmap.compress(
-                                android.graphics.Bitmap.CompressFormat.JPEG, 80, outputStream
-                            )
-                            Base64.encodeToString(outputStream.toByteArray(), Base64.NO_WRAP)
-                        } catch (e: Exception) {
-                            null
-                        }
-                    }
+                val imagesBase64 = withContext(Dispatchers.IO) {
+                    photoUris.mapNotNull { uri -> downsampledBase64FromUri(context, uri) }
                 }
 
                 val response = WashApiClient.service.assess(
@@ -116,7 +99,7 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
                         reportChannel = "photo",
                         incidentDescription = description,
                         reportedDate = today,
-                        imageBase64 = imageBase64
+                        imagesBase64 = imagesBase64.ifEmpty { null }
                     )
                 )
                 if (response.isSuccessful && response.body() != null) {
@@ -136,7 +119,7 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
                             timestampMillis = System.currentTimeMillis(),
                             location = location,
                             description = description,
-                            photoUriString = ScanResultStore.lastPhotoUri.value?.toString(),
+                            photoUriStrings = photoUris.map { it.toString() },
                             result = result
                         )
                     )
@@ -162,7 +145,7 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
     when (step) {
         ScanStep.LIMIT_REACHED -> {
             Column(
-                modifier = Modifier.fillMaxSize().padding(24.dp),
+                modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars).padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -193,7 +176,7 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
 
         ScanStep.PERMISSION -> {
             Column(
-                modifier = Modifier.fillMaxSize().padding(24.dp),
+                modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars).padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -208,7 +191,8 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
         ScanStep.CAMERA -> {
             CameraCapture(
                 onPhotoCaptured = { uri ->
-                    ScanResultStore.lastPhotoUri.value = uri
+                    photoUris = photoUris + uri
+                    ScanResultStore.lastPhotoUris.value = photoUris
                     step = ScanStep.FORM
                 },
                 onCancel = { /* stay on camera; Home button handles exit via nav back */ }
@@ -220,6 +204,7 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .windowInsetsPadding(WindowInsets.systemBars)
                         .padding(24.dp)
                 ) {
                     Text("Describe what you found", style = MaterialTheme.typography.titleLarge)
@@ -230,6 +215,77 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
                             "$remaining free ${if (remaining == 1) "scan" else "scans"} remaining · resets every ${FreeScanTracker.WINDOW_HOURS}h",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Spacer(Modifier.height(16.dp))
+
+                    Text(
+                        "Photos (${photoUris.size}/$maxPhotos)",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        photoUris.forEachIndexed { index, uri ->
+                            Box(modifier = Modifier.size(84.dp).padding(end = 8.dp)) {
+                                AsyncImage(
+                                    model = uri,
+                                    contentDescription = "Captured photo ${index + 1}",
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(RoundedCornerShape(12.dp)),
+                                    contentScale = ContentScale.Crop
+                                )
+                                IconButton(
+                                    enabled = step != ScanStep.SUBMITTING,
+                                    onClick = {
+                                        photoUris = photoUris.filterIndexed { i, _ -> i != index }
+                                        ScanResultStore.lastPhotoUris.value = photoUris
+                                    },
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(2.dp)
+                                        .size(22.dp)
+                                        .background(Color.Black.copy(alpha = 0.55f), CircleShape)
+                                ) {
+                                    Icon(
+                                        Icons.Filled.Close,
+                                        contentDescription = "Remove photo ${index + 1}",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                }
+                            }
+                        }
+                        if (photoUris.size < maxPhotos) {
+                            Box(
+                                modifier = Modifier
+                                    .size(84.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    .clickable(enabled = step != ScanStep.SUBMITTING) {
+                                        step = ScanStep.CAMERA
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    Icons.Filled.Add,
+                                    contentDescription = "Add another photo",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+                    if (!hasProAccess && photoUris.size >= maxPhotos) {
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            "Upgrade to Pro for up to 10 photos per scan",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.clickable { onRequirePro() }
                         )
                     }
                     Spacer(Modifier.height(16.dp))
