@@ -50,11 +50,6 @@ object ScanHistoryStore {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit().putString(KEY_RECORDS, gson.toJson(trimmed)).apply()
     }
-        val current = getAll(context).toMutableList()
-        current.add(0, record) // newest first
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit().putString(KEY_RECORDS, gson.toJson(current)).apply()
-    }
 
     fun getAll(context: Context): List<ScanRecord> {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
