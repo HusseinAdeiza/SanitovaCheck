@@ -54,9 +54,6 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
     val canScan = hasProAccess || !FreeScanTracker.hasReachedLimit(context)
     val maxPhotos = if (hasProAccess) 10 else 2
     var photoUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
-    // Video is a Pro-only, optional attachment alongside the photo set (one clip
-    // per scan) — its extracted frames ride the same submission pipeline as photos
-    // but aren't counted against maxPhotos.
     var videoFrameUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var isExtractingFrames by remember { mutableStateOf(false) }
 
@@ -118,7 +115,8 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
                         FreeScanTracker.increment(context)
                     }
 
-                    // Save to persistent history so it shows up for Pro users later
+                    // Save to persistent history — free users keep newest 10, Pro keeps all
+                    val historyLimit = if (hasProAccess) null else 10
                     ScanHistoryStore.save(
                         context,
                         ScanRecord(
@@ -128,7 +126,8 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
                             description = description,
                             photoUriStrings = allImageUris.map { it.toString() },
                             result = result
-                        )
+                        ),
+                        maxRecords = historyLimit
                     )
 
                     onScanComplete(caseId)
@@ -202,7 +201,7 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
                     ScanResultStore.lastPhotoUris.value = photoUris
                     step = ScanStep.FORM
                 },
-                onCancel = { /* stay on camera; Home button handles exit via nav back */ }
+                onCancel = { }
             )
         }
 
@@ -373,7 +372,7 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
                     OutlinedTextField(
                         value = location,
                         onValueChange = { location = it },
-                        label = { Text("Location (e.g. Karu LGA, Abuja FCT)") },
+                        label = { Text("Location (e.g. City, Country/Region)") },
                         enabled = step != ScanStep.SUBMITTING,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -419,7 +418,6 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
                     }
                 }
 
-                // Full-screen loading overlay during submission
                 if (step == ScanStep.SUBMITTING) {
                     Box(
                         modifier = Modifier

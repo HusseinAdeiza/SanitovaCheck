@@ -15,6 +15,7 @@ sealed class Screen(val route: String) {
         fun createRoute(scanId: String) = "report/$scanId"
     }
     object History : Screen("history")
+    object Learn : Screen("learn")
     object Settings : Screen("settings")
     object Paywall : Screen("paywall")
 }
@@ -45,6 +46,7 @@ fun SanitovaCheckNavHost() {
             HomeScreen(
                 onStartScan = { navController.navigate(Screen.Scan.route) },
                 onOpenHistory = { navController.navigate(Screen.History.route) },
+                onOpenLearn = { navController.navigate(Screen.Learn.route) },
                 onOpenSettings = { navController.navigate(Screen.Settings.route) }
             )
         }
@@ -73,6 +75,10 @@ fun SanitovaCheckNavHost() {
                     navController.navigate(Screen.Report.createRoute(scanId))
                 }
             )
+        }
+
+        composable(Screen.Learn.route) {
+            LearnScreen()
         }
 
         composable(Screen.Settings.route) {

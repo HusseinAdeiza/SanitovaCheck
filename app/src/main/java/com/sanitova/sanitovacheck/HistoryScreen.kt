@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -29,52 +28,26 @@ fun HistoryScreen(onRequirePro: () -> Unit, onOpenRecord: (String) -> Unit) {
 
     LaunchedEffect(Unit) {
         SubscriptionRepository.refreshEntitlementStatus()
+        records = ScanHistoryStore.getAll(context)
     }
 
-    LaunchedEffect(hasProAccess) {
-        if (hasProAccess) {
-            records = ScanHistoryStore.getAll(context)
-        }
-    }
+    val displayRecords = if (hasProAccess) records else records.take(FreeScanTracker.FREE_HISTORY_LIMIT)
+    val isAtFreeLimit = !hasProAccess && records.size >= FreeScanTracker.FREE_HISTORY_LIMIT
 
     Column(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars).padding(24.dp)) {
         Text("Scan History", style = MaterialTheme.typography.headlineSmall)
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(8.dp))
 
         if (!hasProAccess) {
-            Card(
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(
-                        Icons.Filled.Lock,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        "Scan history is a Pro feature",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    ProBenefitsList()
-                    Spacer(Modifier.height(16.dp))
-                    Button(onClick = onRequirePro, shape = RoundedCornerShape(14.dp)) {
-                        Text("Upgrade to Pro")
-                    }
-                }
-            }
-            return@Column
+            Text(
+                "Free tier: ${displayRecords.size} of ${FreeScanTracker.FREE_HISTORY_LIMIT} saved scans shown",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(16.dp))
         }
 
-        if (records.isEmpty()) {
+        if (displayRecords.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
@@ -93,8 +66,40 @@ fun HistoryScreen(onRequirePro: () -> Unit, onOpenRecord: (String) -> Unit) {
             }
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(records) { record ->
+                items(displayRecords) { record ->
                     HistoryRow(record = record, onClick = { onOpenRecord(record.caseId) })
+                }
+
+                if (isAtFreeLimit) {
+                    item {
+                        Spacer(Modifier.height(8.dp))
+                        Card(
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(20.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    "You've reached the free history limit.",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    "Upgrade to Pro for unlimited scan history and more features.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                                Spacer(Modifier.height(12.dp))
+                                Button(onClick = onRequirePro, shape = RoundedCornerShape(14.dp)) {
+                                    Text("Upgrade to Pro")
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

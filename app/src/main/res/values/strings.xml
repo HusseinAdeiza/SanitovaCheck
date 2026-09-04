@@ -1,3 +1,88 @@
 <resources>
     <string name="app_name">SanitovaCheck</string>
+
+    <!-- Home Screen -->
+    <string name="home_title">SanitovaCheck</string>
+    <string name="home_headline">Facility compliance,\nchecked in minutes.</string>
+    <string name="home_subtitle">Photograph a facility, describe what you see, and get an instant AI-assisted WASH compliance risk assessment.</string>
+    <string name="home_cta_scan">Start New Assessment</string>
+    <string name="home_cta_history">Scan History</string>
+    <string name="home_trust_instant">Instant results</string>
+    <string name="home_trust_ai">AI-assisted</string>
+    <string name="home_trust_standards">WASH standards</string>
+
+    <!-- Scan Screen -->
+    <string name="scan_title">Describe what you found</string>
+    <string name="scan_free_remaining">%1$d free %2$s remaining · resets every %3$dh</string>
+    <string name="scan_photos_label">Photos (%1$d/%2$d)</string>
+    <string name="scan_add_photo">Add another photo</string>
+    <string name="scan_remove_photo">Remove photo %1$d</string>
+    <string name="scan_photo_limit_pro">Upgrade to Pro for up to 10 photos per scan</string>
+    <string name="scan_video_attached">Video clip attached (%1$d frames)</string>
+    <string name="scan_video_extracting">Extracting video frames…</string>
+    <string name="scan_video_add_pro">Add video clip (Pro)</string>
+    <string name="scan_video_add">Add a short video clip</string>
+    <string name="scan_location_hint">Location (e.g. City, Country/Region)</string>
+    <string name="scan_description_hint">What did you observe?</string>
+    <string name="scan_submit">Submit for Assessment</string>
+    <string name="scan_retry">Retry</string>
+    <string name="scan_limit_reached_title">You\'ve used all %1$d free scans</string>
+    <string name="scan_limit_reached_body">Resets in %1$s — or upgrade to Pro for unlimited scans anytime:</string>
+    <string name="scan_permission_request">SanitovaCheck needs camera access to photograph the facility you\'re assessing.</string>
+    <string name="scan_permission_grant">Grant Camera Access</string>
+    <string name="scan_analyzing">Analyzing your submission…</string>
+    <string name="scan_analyzing_detail">Checking your photo and description against WASH standards.</string>
+    <string name="scan_error_server">Assessment failed (server responded with an error, code %1$d). Please try again.</string>
+    <string name="scan_error_no_internet">No internet connection. Check your network and try again.</string>
+    <string name="scan_error_timeout">The request timed out. Your connection may be slow — try again.</string>
+    <string name="scan_error_generic">Something went wrong. Please try again.</string>
+
+    <!-- History Screen -->
+    <string name="history_title">Scan History</string>
+    <string name="history_free_label">Free tier: %1$d of %2$d saved scans shown</string>
+    <string name="history_empty">Your completed assessments will appear here.</string>
+    <string name="history_limit_reached_title">You\'ve reached the free history limit.</string>
+    <string name="history_limit_reached_body">Upgrade to Pro for unlimited scan history and more features.</string>
+    <string name="history_upgrade">Upgrade to Pro</string>
+
+    <!-- Report Screen -->
+    <string name="report_title">Compliance Report</string>
+    <string name="report_case_id">Case ID: %1$s</string>
+    <string name="report_risk_level">%1$s RISK</string>
+    <string name="report_risk_score">Risk Score: %1$d / 10</string>
+    <string name="report_section_summary">Summary</string>
+    <string name="report_section_concerns">Key Concerns</string>
+    <string name="report_section_action">Recommended Action</string>
+    <string name="report_assigned_to">Assigned to: %1$s</string>
+    <string name="report_response_window">Response window: %1$d hours</string>
+    <string name="report_export_pdf">Export PDF Report</string>
+    <string name="report_pdf_remaining">%1$d free PDF %2$s remaining</string>
+    <string name="report_pdf_exhausted">No free exports remaining — upgrade to Pro for unlimited exports</string>
+    <string name="report_photo_match">Photo matches description</string>
+    <string name="report_photo_mismatch">Photo may not match description</string>
+    <string name="report_ai_observed">What the AI actually observed:</string>
+    <string name="report_no_data">No assessment data available for this scan.</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_pro_title">SanitovaCheck Pro</string>
+    <string name="settings_manage_subscription">Manage Subscription</string>
+    <string name="settings_restore_purchases">Restore Purchases</string>
+    <string name="settings_terms">Terms of Service</string>
+    <string name="settings_privacy">Privacy Policy</string>
+    <string name="settings_footer">SanitovaCheck by Sanitova Environmental Health Services Ltd</string>
+
+    <!-- Pro Benefits (reused across screens) -->
+    <string name="pro_benefit_unlimited_scans">Unlimited scans</string>
+    <string name="pro_benefit_unlimited_pdf">Unlimited PDF exports</string>
+    <string name="pro_benefit_full_history">Full scan history</string>
+    <string name="pro_benefit_multi_photo">Up to 10 photos per scan</string>
+    <string name="pro_benefit_video">Video capture support</string>
+
+    <!-- Upgrade CTA -->
+    <string name="upgrade_to_pro">Upgrade to Pro</string>
+
+    <!-- Generic -->
+    <string name="generic_share">Share</string>
+    <string name="generic_remove">Remove</string>
 </resources>

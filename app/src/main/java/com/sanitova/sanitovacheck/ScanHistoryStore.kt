@@ -33,7 +33,23 @@ object ScanHistoryStore {
 
     private val gson = Gson()
 
-    fun save(context: Context, record: ScanRecord) {
+    /**
+     * Saves a record. If maxRecords is specified, trims the oldest entries
+     * so only the newest maxRecords are kept. Use this for free-tier limits.
+     */
+    fun save(context: Context, record: ScanRecord, maxRecords: Int? = null) {
+        val current = getAll(context).toMutableList()
+        current.add(0, record) // newest first
+
+        val trimmed = if (maxRecords != null && current.size > maxRecords) {
+            current.take(maxRecords)
+        } else {
+            current
+        }
+
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_RECORDS, gson.toJson(trimmed)).apply()
+    }
         val current = getAll(context).toMutableList()
         current.add(0, record) // newest first
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

@@ -12,6 +12,9 @@ interface WashApiService {
     @POST("assess")
     suspend fun assess(@Body request: AssessRequest): Response<AssessResponse>
 
+    @POST("chat")
+    suspend fun chat(@Body request: ChatRequest): Response<ChatResponse>
+
     @GET("health")
     suspend fun health(): Response<Map<String, String>>
 }

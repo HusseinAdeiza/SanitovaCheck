@@ -15,6 +15,8 @@ object FreeScanTracker {
 
     const val FREE_SCAN_LIMIT = 5
     const val WINDOW_HOURS = 5
+    const val FREE_HISTORY_LIMIT = 10
+    const val WINDOW_HOURS = 5
     private const val WINDOW_MILLIS = WINDOW_HOURS * 60 * 60 * 1000L
 
     private fun prefs(context: Context) =

@@ -7,12 +7,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.WaterDrop
-import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.*
@@ -29,6 +29,7 @@ import com.sanitova.sanitovacheck.ui.theme.*
 fun HomeScreen(
     onStartScan: () -> Unit,
     onOpenHistory: () -> Unit,
+    onOpenLearn: () -> Unit,
     onOpenSettings: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars)) {
@@ -56,8 +57,7 @@ fun HomeScreen(
             }
         }
 
-        // Hero photo zone — real, properly licensed Unsplash photo
-        // (Photo by Liz Martin on Unsplash, free under Unsplash License)
+        // Hero photo zone
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -72,7 +72,6 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
-            // Small brand badge overlay, bottom-left
             Box(
                 modifier = Modifier
                     .padding(16.dp)
@@ -127,6 +126,18 @@ fun HomeScreen(
                 Text("Scan History", style = MaterialTheme.typography.titleMedium)
             }
 
+            Spacer(Modifier.height(12.dp))
+
+            OutlinedButton(
+                onClick = onOpenLearn,
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Icon(Icons.Filled.MenuBook, contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Learn about WASH", style = MaterialTheme.typography.titleMedium)
+            }
+
             Spacer(Modifier.height(32.dp))
         }
     }
@@ -152,4 +163,3 @@ private fun TrustItem(icon: ImageVector, label: String) {
         Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
-

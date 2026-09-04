@@ -2,6 +2,9 @@ package com.sanitova.sanitovacheck
 
 import com.google.gson.annotations.SerializedName
 
+data class ChatRequest(val message: String)
+data class ChatResponse(val reply: String)
+
 data class AssessRequest(
     @SerializedName("case_id") val caseId: String? = null,
     val location: String,
