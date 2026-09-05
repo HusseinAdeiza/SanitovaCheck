@@ -1,0 +1,17 @@
+# Splash Video Instructions
+
+To use a custom splash video instead of the animated fallback:
+
+1. Add your 5-10 second WASH education video to this folder
+2. Name it exactly: `splash_video.mp4`
+3. Rebuild the app
+
+The app will auto-detect the file and play it on launch.
+If no file is present, a beautiful animated fallback with WASH statistics is shown instead.
+
+## Video recommendations:
+- Format: MP4 (H.264)
+- Resolution: 720p or 1080p
+- Duration: 5-10 seconds
+- Audio: Optional (muted by default)
+- Content: WASH education, clean water, sanitation, or hygiene awareness

@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
 sealed class Screen(val route: String) {
+    object Splash : Screen("splash")
     object Onboarding : Screen("onboarding")
     object Home : Screen("home")
     object Scan : Screen("scan")
@@ -27,13 +28,23 @@ sealed class Screen(val route: String) {
 fun SanitovaCheckNavHost() {
     val navController: NavHostController = rememberNavController()
     val context = LocalContext.current
-    val startDestination = if (OnboardingPrefs.hasSeenOnboarding(context)) {
-        Screen.Home.route
-    } else {
-        Screen.Onboarding.route
-    }
 
-    NavHost(navController = navController, startDestination = startDestination) {
+    NavHost(navController = navController, startDestination = Screen.Splash.route) {
+
+        composable(Screen.Splash.route) {
+            SplashScreen(
+                onFinished = {
+                    val nextRoute = if (OnboardingPrefs.hasSeenOnboarding(context)) {
+                        Screen.Home.route
+                    } else {
+                        Screen.Onboarding.route
+                    }
+                    navController.navigate(nextRoute) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                }
+            )
+        }
 
         composable(Screen.Onboarding.route) {
             OnboardingScreen(
