@@ -35,10 +35,10 @@ fun SanitovaCheckNavHost() {
         composable(Screen.Splash.route) {
             SplashScreen(
                 onFinished = {
-                    val nextRoute = if (OnboardingPrefs.hasSeenOnboarding(context)) {
-                        Screen.Home.route
-                    } else {
-                        Screen.Onboarding.route
+                    val nextRoute = when {
+                        !OnboardingPrefs.hasSeenOnboarding(context) -> Screen.Onboarding.route
+                        !AuthRepository.isSignedIn() -> Screen.Auth.route
+                        else -> Screen.Home.route
                     }
                     navController.navigate(nextRoute) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
@@ -50,7 +50,12 @@ fun SanitovaCheckNavHost() {
         composable(Screen.Onboarding.route) {
             OnboardingScreen(
                 onFinished = {
-                    navController.navigate(Screen.Home.route) {
+                    val nextRoute = if (AuthRepository.isSignedIn()) {
+                        Screen.Home.route
+                    } else {
+                        Screen.Auth.route
+                    }
+                    navController.navigate(nextRoute) {
                         popUpTo(Screen.Onboarding.route) { inclusive = true }
                     }
                 }
@@ -117,7 +122,11 @@ fun SanitovaCheckNavHost() {
 
         composable(Screen.Auth.route) {
             AuthScreen(
-                onAuthSuccess = { navController.popBackStack() },
+                onAuthSuccess = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Auth.route) { inclusive = true }
+                    }
+                },
                 onBack = { navController.popBackStack() }
             )
         }

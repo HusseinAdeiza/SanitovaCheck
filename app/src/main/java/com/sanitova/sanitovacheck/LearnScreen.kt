@@ -1,12 +1,7 @@
 package com.sanitova.sanitovacheck
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
-import android.webkit.WebChromeClient
-import android.webkit.WebSettings
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -24,10 +19,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
+import coil.compose.SubcomposeAsyncImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -129,13 +125,30 @@ private fun ArticleCard(article: WashArticle, onClick: () -> Unit) {
     }
 }
 
-@SuppressLint("SetJavaScriptEnabled")
+/**
+ * Extract YouTube video ID from various URL formats.
+ */
+private fun extractYouTubeVideoId(url: String): String? {
+    val patterns = listOf(
+        "[?&]v=([a-zA-Z0-9_-]{11})".toRegex(),
+        "embed/([a-zA-Z0-9_-]{11})".toRegex(),
+        "youtu\\.be/([a-zA-Z0-9_-]{11})".toRegex(),
+        "shorts/([a-zA-Z0-9_-]{11})".toRegex()
+    )
+    for (pattern in patterns) {
+        pattern.find(url)?.groupValues?.get(1)?.let { return it }
+    }
+    return null
+}
+
 @Composable
 private fun VideosTab() {
     val context = LocalContext.current
     LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         items(washVideos) { video ->
-            var hasError by remember { mutableStateOf(false) }
+            val videoId = remember(video.embedUrl) { extractYouTubeVideoId(video.embedUrl) }
+            // Use mqdefault (320x180) thumbnail — reliable and loads fast
+            val thumbnailUrl = videoId?.let { "https://img.youtube.com/vi/$it/mqdefault.jpg" }
 
             Card(
                 shape = RoundedCornerShape(16.dp),
@@ -169,68 +182,109 @@ private fun VideosTab() {
                     )
                     Spacer(Modifier.height(12.dp))
 
-                    if (!hasError) {
-                        // Embedded YouTube player via WebView
+                    // Thumbnail with play button overlay
+                    if (thumbnailUrl != null) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(200.dp)
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(Color.Black)
+                                .clickable {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(video.watchUrl))
+                                    context.startActivity(intent)
+                                },
+                            contentAlignment = Alignment.Center
                         ) {
-                            AndroidView(
-                                factory = { ctx ->
-                                    WebView(ctx).apply {
-                                        settings.javaScriptEnabled = true
-                                        settings.domStorageEnabled = true
-                                        settings.cacheMode = WebSettings.LOAD_DEFAULT
-                                        settings.mediaPlaybackRequiresUserGesture = false
-                                        // Desktop user-agent to prevent mobile app redirects
-                                        settings.userAgentString = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-                                        webChromeClient = WebChromeClient()
-                                        webViewClient = object : WebViewClient() {
-                                            override fun onReceivedError(
-                                                view: WebView?, request: android.webkit.WebResourceRequest?, error: android.webkit.WebResourceError?
-                                            ) {
-                                                super.onReceivedError(view, request, error)
-                                                hasError = true
-                                            }
-
-                                            override fun shouldOverrideUrlLoading(view: WebView?, request: android.webkit.WebResourceRequest?): Boolean {
-                                                val url = request?.url?.toString() ?: return false
-                                                // Block intent:// and market:// redirects
-                                                if (url.startsWith("intent://") || url.startsWith("market://") || url.startsWith("vnd.youtube://")) {
-                                                    return true
-                                                }
-                                                return false
-                                            }
-                                        }
-                                        val html = """
-                                            <!DOCTYPE html>
-                                            <html><head>
-                                            <meta name="viewport" content="width=device-width, initial-scale=1">
-                                            <style>
-                                                body{margin:0;padding:0;overflow:hidden;background:#000;}
-                                                .container{position:relative;width:100%;height:100vh;}
-                                                iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0;}
-                                            </style>
-                                            </head><body>
-                                            <div class="container">
-                                            <iframe src="${video.embedUrl}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1" 
-                                            frameborder="0" allowfullscreen 
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
-                                            </div>
-                                            </body></html>
-                                        """.trimIndent()
-                                        loadDataWithBaseURL("https://www.youtube.com", html, "text/html", "UTF-8", null)
+                            SubcomposeAsyncImage(
+                                model = thumbnailUrl,
+                                contentDescription = video.title,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize(),
+                                loading = {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(32.dp),
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
                                     }
                                 },
-                                modifier = Modifier.fillMaxSize()
+                                error = {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Icon(
+                                                Icons.Filled.PlayCircle,
+                                                contentDescription = null,
+                                                tint = Color.White,
+                                                modifier = Modifier.size(48.dp)
+                                            )
+                                            Spacer(Modifier.height(8.dp))
+                                            Text(
+                                                "Tap to watch on YouTube",
+                                                color = Color.White,
+                                                style = MaterialTheme.typography.bodySmall
+                                            )
+                                        }
+                                    }
+                                }
                             )
+
+                            // Dark overlay for better play button visibility
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black.copy(alpha = 0.25f))
+                            )
+
+                            // Play button
+                            Box(
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .clip(RoundedCornerShape(32.dp))
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    Icons.Filled.PlayCircle,
+                                    contentDescription = "Play",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(40.dp)
+                                )
+                            }
+                        }
+                    } else {
+                        // Fallback if no video ID could be extracted
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color.DarkGray),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    Icons.Filled.PlayCircle,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(48.dp)
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                Text(
+                                    "Video preview unavailable",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
                         }
                     }
 
-                    // Fallback: always show Watch on YouTube button
                     Spacer(Modifier.height(8.dp))
                     OutlinedButton(
                         onClick = {
@@ -242,7 +296,7 @@ private fun VideosTab() {
                     ) {
                         Icon(Icons.Filled.PlayCircle, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text(if (hasError) "Watch on YouTube" else "Open in YouTube app")
+                        Text("Open in YouTube app")
                     }
                 }
             }
