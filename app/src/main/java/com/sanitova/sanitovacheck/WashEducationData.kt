@@ -25,7 +25,8 @@ data class WashVideo(
     val title: String,
     val source: String,
     val description: String,
-    val embedUrl: String
+    val embedUrl: String,
+    val watchUrl: String
 )
 
 val washArticles = listOf(
@@ -454,51 +455,45 @@ In humanitarian settings, distribute dignity kits containing: sanitary pads, soa
 
 val washVideos = listOf(
     WashVideo(
-        title = "WHO: Water, Sanitation and Hygiene Overview",
-        source = "World Health Organization",
-        description = "Official WHO overview of global WASH challenges and progress toward SDG 6.",
-        embedUrl = "https://www.youtube.com/embed/BCHhwxvQqxg"
+        title = "How to Wash Your Hands",
+        source = "WHO",
+        description = "Step-by-step demonstration of proper handwashing technique with soap and water.",
+        embedUrl = "https://www.youtube-nocookie.com/embed/3PmVJQUCm4E",
+        watchUrl = "https://www.youtube.com/watch?v=3PmVJQUCm4E"
     ),
     WashVideo(
-        title = "UNICEF: The Power of Handwashing",
+        title = "WHO Hand Hygiene Guidelines",
+        source = "World Health Organization",
+        description = "Official WHO guidance on hand hygiene in health care settings.",
+        embedUrl = "https://www.youtube-nocookie.com/embed/tJwA1UWQVZI",
+        watchUrl = "https://www.youtube.com/watch?v=tJwA1UWQVZI"
+    ),
+    WashVideo(
+        title = "Clean Water Saves Lives",
         source = "UNICEF",
-        description = "How simple handwashing with soap saves children's lives worldwide.",
-        embedUrl = "https://www.youtube.com/embed/77IZttD_pU8"
-    ),
-    WashVideo(
-        title = "Cholera Prevention and Control",
-        source = "World Health Organization",
-        description = "Key measures to prevent and control cholera outbreaks in communities.",
-        embedUrl = "https://www.youtube.com/embed/0v2j8Wd1vKg"
-    ),
-    WashVideo(
-        title = "Safe Water Storage at Home",
-        source = "Centers for Disease Control",
-        description = "Practical guidance on storing treated water safely to prevent recontamination.",
-        embedUrl = "https://www.youtube.com/embed/G5hzvu7-TX8"
+        description = "Why access to clean water and sanitation is essential for child survival and development.",
+        embedUrl = "https://www.youtube-nocookie.com/embed/77IZttD_pU8",
+        watchUrl = "https://www.youtube.com/watch?v=77IZttD_pU8"
     ),
     WashVideo(
         title = "Building a Tippy-Tap Handwashing Station",
         source = "WaterAid",
-        description = "Step-by-step guide to building a simple, water-saving handwashing station.",
-        embedUrl = "https://www.youtube.com/embed/6-xS5pQWV1A"
+        description = "Simple, low-cost handwashing station that uses minimal water — perfect for communities without running water.",
+        embedUrl = "https://www.youtube-nocookie.com/embed/6-xS5pQWV1A",
+        watchUrl = "https://www.youtube.com/watch?v=6-xS5pQWV1A"
     ),
     WashVideo(
-        title = "Community-Led Total Sanitation in Action",
+        title = "Cholera Prevention: What You Need to Know",
+        source = "CDC",
+        description = "Key facts about cholera transmission, symptoms, and how to protect yourself and your community.",
+        embedUrl = "https://www.youtube-nocookie.com/embed/0v2j8Wd1vKg",
+        watchUrl = "https://www.youtube.com/watch?v=0v2j8Wd1vKg"
+    ),
+    WashVideo(
+        title = "Community-Led Total Sanitation",
         source = "UNICEF",
-        description = "How communities are ending open defecation through collective action.",
-        embedUrl = "https://www.youtube.com/embed/4Bf6X3z4p0Y"
-    ),
-    WashVideo(
-        title = "Menstrual Hygiene Management in Schools",
-        source = "UNICEF",
-        description = "Why MHM facilities matter for keeping girls in school.",
-        embedUrl = "https://www.youtube.com/embed/3y1y6L2g3cE"
-    ),
-    WashVideo(
-        title = "Emergency WASH Response: First 72 Hours",
-        source = "Sphere Project",
-        description = "Priorities and minimum standards for WASH in humanitarian emergencies.",
-        embedUrl = "https://www.youtube.com/embed/5kX5g1i8b2w"
+        description = "How communities can end open defecation through local leadership and collective action.",
+        embedUrl = "https://www.youtube-nocookie.com/embed/4Bf6X3z4p0Y",
+        watchUrl = "https://www.youtube.com/watch?v=4Bf6X3z4p0Y"
     )
 )

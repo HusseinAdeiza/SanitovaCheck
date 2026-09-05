@@ -1,6 +1,8 @@
 package com.sanitova.sanitovacheck
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
@@ -13,9 +15,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -130,8 +132,11 @@ private fun ArticleCard(article: WashArticle, onClick: () -> Unit) {
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 private fun VideosTab() {
+    val context = LocalContext.current
     LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         items(washVideos) { video ->
+            var hasError by remember { mutableStateOf(false) }
+
             Card(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -164,67 +169,80 @@ private fun VideosTab() {
                     )
                     Spacer(Modifier.height(12.dp))
 
-                    // Embedded YouTube player via WebView
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.Black)
-                    ) {
-                        AndroidView(
-                            factory = { ctx ->
-                                WebView(ctx).apply {
-                                    settings.javaScriptEnabled = true
-                                    settings.domStorageEnabled = true
-                                    settings.cacheMode = WebSettings.LOAD_DEFAULT
-                                    settings.mediaPlaybackRequiresUserGesture = false
-                                    // Use desktop user-agent to prevent mobile app redirects
-                                    settings.userAgentString = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-                                    webChromeClient = WebChromeClient()
-                                    webViewClient = object : WebViewClient() {
-                                        override fun shouldOverrideUrlLoading(view: WebView?, request: android.webkit.WebResourceRequest?): Boolean {
-                                            val url = request?.url?.toString() ?: return false
-                                            // Block intent:// and market:// URLs that try to open external apps
-                                            return url.startsWith("intent://") || url.startsWith("market://") || url.startsWith("vnd.youtube://")
+                    if (!hasError) {
+                        // Embedded YouTube player via WebView
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color.Black)
+                        ) {
+                            AndroidView(
+                                factory = { ctx ->
+                                    WebView(ctx).apply {
+                                        settings.javaScriptEnabled = true
+                                        settings.domStorageEnabled = true
+                                        settings.cacheMode = WebSettings.LOAD_DEFAULT
+                                        settings.mediaPlaybackRequiresUserGesture = false
+                                        // Desktop user-agent to prevent mobile app redirects
+                                        settings.userAgentString = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+                                        webChromeClient = WebChromeClient()
+                                        webViewClient = object : WebViewClient() {
+                                            override fun onReceivedError(
+                                                view: WebView?, request: android.webkit.WebResourceRequest?, error: android.webkit.WebResourceError?
+                                            ) {
+                                                super.onReceivedError(view, request, error)
+                                                hasError = true
+                                            }
+
+                                            override fun shouldOverrideUrlLoading(view: WebView?, request: android.webkit.WebResourceRequest?): Boolean {
+                                                val url = request?.url?.toString() ?: return false
+                                                // Block intent:// and market:// redirects
+                                                if (url.startsWith("intent://") || url.startsWith("market://") || url.startsWith("vnd.youtube://")) {
+                                                    return true
+                                                }
+                                                return false
+                                            }
                                         }
+                                        val html = """
+                                            <!DOCTYPE html>
+                                            <html><head>
+                                            <meta name="viewport" content="width=device-width, initial-scale=1">
+                                            <style>
+                                                body{margin:0;padding:0;overflow:hidden;background:#000;}
+                                                .container{position:relative;width:100%;height:100vh;}
+                                                iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0;}
+                                            </style>
+                                            </head><body>
+                                            <div class="container">
+                                            <iframe src="${video.embedUrl}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1" 
+                                            frameborder="0" allowfullscreen 
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                                            </div>
+                                            </body></html>
+                                        """.trimIndent()
+                                        loadDataWithBaseURL("https://www.youtube.com", html, "text/html", "UTF-8", null)
                                     }
-                                    val html = """
-                                        <html><head>
-                                        <meta name="viewport" content="width=device-width, initial-scale=1">
-                                        <style>body{margin:0;padding:0;overflow:hidden;background:#000;}
-                                        iframe{width:100%;height:100%;border:0;}</style>
-                                        </head><body>
-                                        <iframe src="${video.embedUrl}?rel=0&modestbranding=1&playsinline=1" 
-                                        allowfullscreen allow="autoplay; encrypted-media"></iframe>
-                                        </body></html>
-                                    """.trimIndent()
-                                    loadDataWithBaseURL("https://www.youtube.com", html, "text/html", "UTF-8", null)
-                                }
-                            },
-                            modifier = Modifier.fillMaxSize()
-                        )
+                                },
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
                     }
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.Black)
+
+                    // Fallback: always show Watch on YouTube button
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedButton(
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(video.watchUrl))
+                            context.startActivity(intent)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        AndroidView(
-                            factory = { ctx ->
-                                WebView(ctx).apply {
-                                    settings.javaScriptEnabled = true
-                                    settings.domStorageEnabled = true
-                                    settings.cacheMode = WebSettings.LOAD_DEFAULT
-                                    webViewClient = WebViewClient()
-                                    webChromeClient = WebChromeClient()
-                                    loadUrl(video.embedUrl)
-                                }
-                            },
-                            modifier = Modifier.fillMaxSize()
-                        )
+                        Icon(Icons.Filled.PlayCircle, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(if (hasError) "Watch on YouTube" else "Open in YouTube app")
                     }
                 }
             }

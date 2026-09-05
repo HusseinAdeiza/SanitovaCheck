@@ -1,6 +1,5 @@
 package com.sanitova.sanitovacheck
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -8,13 +7,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Verified
-import androidx.compose.ui.res.painterResource
+import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -44,11 +42,20 @@ fun HomeScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = painterResource(R.drawable.ic_sanitova_logo),
-                    contentDescription = "SanitovaCheck logo",
-                    modifier = Modifier.size(28.dp)
-                )
+                // Water-themed app logo
+                Box(
+                    modifier = Modifier
+                        .size(28.dp)
+                        .background(MaterialTheme.colorScheme.primary, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Filled.WaterDrop,
+                        contentDescription = "SanitovaCheck logo",
+                        tint = PureWhite,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
                 Spacer(Modifier.width(8.dp))
                 Text("SanitovaCheck", style = MaterialTheme.typography.titleLarge)
             }
@@ -79,10 +86,11 @@ fun HomeScreen(
                     .background(MaterialTheme.colorScheme.primary, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Image(
-                    painter = painterResource(R.drawable.ic_sanitova_logo),
+                Icon(
+                    Icons.Filled.WaterDrop,
                     contentDescription = null,
-                    modifier = Modifier.size(26.dp)
+                    tint = PureWhite,
+                    modifier = Modifier.size(28.dp)
                 )
             }
         }
