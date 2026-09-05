@@ -115,7 +115,6 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
                         FreeScanTracker.increment(context)
                     }
 
-                    // Save to persistent history — free users keep newest 10, Pro keeps all
                     val historyLimit = if (hasProAccess) null else 10
                     ScanHistoryStore.save(
                         context,
@@ -208,6 +207,7 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
         ScanStep.VIDEO -> {
             VideoCapture(
                 onVideoCaptured = { videoUri ->
+                    VideoTrialTracker.recordVideo(context, hasProAccess)
                     isExtractingFrames = true
                     step = ScanStep.FORM
                     scope.launch {
@@ -356,14 +356,32 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
                             }
                         }
                         else -> {
+                            val canRecordVideo = VideoTrialTracker.canRecordVideo(context, hasProAccess)
+                            val videoLabel = when {
+                                hasProAccess -> "Add video clip (${VideoTrialTracker.proStatusText(context)})"
+                                !VideoTrialTracker.hasUsedFreeTrial(context) -> "Add video clip — 1 free trial"
+                                else -> "Add video clip (Pro)"
+                            }
                             OutlinedButton(
-                                enabled = step != ScanStep.SUBMITTING,
-                                onClick = { if (hasProAccess) step = ScanStep.VIDEO else onRequirePro() },
+                                enabled = step != ScanStep.SUBMITTING && canRecordVideo,
+                                onClick = {
+                                    if (canRecordVideo) step = ScanStep.VIDEO
+                                    else onRequirePro()
+                                },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Icon(Icons.Filled.Videocam, contentDescription = null, modifier = Modifier.size(18.dp))
                                 Spacer(Modifier.width(8.dp))
-                                Text(if (hasProAccess) "Add a short video clip" else "Add video clip (Pro)")
+                                Text(videoLabel)
+                            }
+                            if (!hasProAccess && VideoTrialTracker.hasUsedFreeTrial(context)) {
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    "You've used your free video trial. Upgrade to Pro for daily video scans.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.clickable { onRequirePro() }
+                                )
                             }
                         }
                     }
