@@ -16,55 +16,55 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val LightColors = lightColorScheme(
-    primary = Terracotta,
-    onPrimary = Cream,
-    primaryContainer = TerracottaLight,
-    onPrimaryContainer = TerracottaDark,
+    primary = OceanTeal,
+    onPrimary = PureWhite,
+    primaryContainer = OceanTealLight,
+    onPrimaryContainer = OceanTealDark,
 
-    secondary = Olive,
-    onSecondary = Cream,
-    secondaryContainer = OliveLight,
-    onSecondaryContainer = OliveDark,
+    secondary = Aqua,
+    onSecondary = PureWhite,
+    secondaryContainer = AquaLight,
+    onSecondaryContainer = AquaDark,
 
-    tertiary = Gold,
-    onTertiary = Charcoal,
-    tertiaryContainer = GoldLight,
-    onTertiaryContainer = Charcoal,
+    tertiary = CyanWave,
+    onTertiary = DeepWater,
+    tertiaryContainer = CyanWaveLight,
+    onTertiaryContainer = DeepWater,
 
-    background = Sand,
-    onBackground = Charcoal,
+    background = Foam,
+    onBackground = DeepWater,
 
-    surface = Cream,
-    onSurface = Charcoal,
-    surfaceVariant = SandDark,
-    onSurfaceVariant = CharcoalLight,
+    surface = PureWhite,
+    onSurface = DeepWater,
+    surfaceVariant = WaterSurface,
+    onSurfaceVariant = DeepWaterLight,
 
     error = ErrorRed,
-    onError = Cream
+    onError = PureWhite
 )
 
 private val DarkColors = darkColorScheme(
-    primary = TerracottaLight,
-    onPrimary = TerracottaDark,
-    primaryContainer = TerracottaDark,
-    onPrimaryContainer = TerracottaLight,
+    primary = OceanTealLight,
+    onPrimary = OceanTealDark,
+    primaryContainer = OceanTealDark,
+    onPrimaryContainer = OceanTealLight,
 
-    secondary = OliveLight,
-    onSecondary = OliveDark,
-    secondaryContainer = OliveDark,
-    onSecondaryContainer = OliveLight,
+    secondary = AquaLight,
+    onSecondary = AquaDark,
+    secondaryContainer = AquaDark,
+    onSecondaryContainer = AquaLight,
 
-    tertiary = GoldLight,
-    onTertiary = Charcoal,
+    tertiary = CyanWaveLight,
+    onTertiary = DeepWater,
 
-    background = Charcoal,
-    onBackground = Sand,
+    background = DeepWater,
+    onBackground = Foam,
 
-    surface = Color(0xFF2E241E),
-    onSurface = Sand,
+    surface = WaterSurfaceDark,
+    onSurface = Foam,
 
     error = Color(0xFFE8897A),
-    onError = Charcoal
+    onError = DeepWater
 )
 
 @Composable

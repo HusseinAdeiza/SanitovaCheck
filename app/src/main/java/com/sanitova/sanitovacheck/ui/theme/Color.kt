@@ -2,36 +2,40 @@ package com.sanitova.sanitovacheck.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// ── Core palette: warm, professional earth tones ──
+// ── Core palette: water / ocean / WASH theme ──
 
-// Primary — Terracotta (warmth, action, brand identity)
-val Terracotta = Color(0xFFC1622D)
-val TerracottaDark = Color(0xFF8F441C)
-val TerracottaLight = Color(0xFFE8A374)
+// Primary — Deep Ocean Teal (water, trust, health)
+val OceanTeal = Color(0xFF0D8A8A)
+val OceanTealDark = Color(0xFF065F5F)
+val OceanTealLight = Color(0xFF4ECDC4)
 
-// Secondary — Olive (trust, "safe/compliant" association)
-val Olive = Color(0xFF6B7A4F)
-val OliveDark = Color(0xFF4A5636)
-val OliveLight = Color(0xFFA3B27F)
+// Secondary — Fresh Aqua (cleanliness, clarity)
+val Aqua = Color(0xFF1A9CB0)
+val AquaDark = Color(0xFF0F6B7A)
+val AquaLight = Color(0xFF7FDBE8)
 
-// Tertiary — Muted gold (accents, highlights)
-val Gold = Color(0xFFC79A45)
-val GoldLight = Color(0xFFE6C583)
+// Tertiary — Cyan Wave (accents, highlights)
+val CyanWave = Color(0xFF00BCD4)
+val CyanWaveLight = Color(0xFF80DEEA)
 
-// Neutrals — warm sand/cream rather than cold grey
-val Sand = Color(0xFFFAF5EE)
-val SandDark = Color(0xFFF0E6D8)
-val Charcoal = Color(0xFF3A2E27)
-val CharcoalLight = Color(0xFF6B5D53)
-val Cream = Color(0xFFFFFDF9)
+// Neutrals — clean water / foam / sky tones instead of grey
+val Foam = Color(0xFFF0F8FF)       // very light blue-white
+val FoamDark = Color(0xFFD6ECF5)   // slightly deeper for cards/elevation
+val DeepWater = Color(0xFF1A3A4A)  // dark navy for text
+val DeepWaterLight = Color(0xFF4A6B7A) // medium for secondary text
+val PureWhite = Color(0xFFFFFFFF)
 
-// ── Risk-level semantic colors (fit naturally into earth palette) ──
-val RiskHigh = Color(0xFFB3452F)      // deep rust red
+// Surface / background variants
+val WaterSurface = Color(0xFFE8F4F8)   // light water tint for surfaces
+val WaterSurfaceDark = Color(0xFF132A35) // dark mode surface
+
+// ── Risk-level semantic colors (adapted to water palette) ──
+val RiskHigh = Color(0xFFB3452F)      // deep rust red — unchanged, works well
 val RiskHighBg = Color(0xFFF7E5DF)
-val RiskMedium = Color(0xFFC79A45)    // muted gold/amber
+val RiskMedium = Color(0xFFD4A017)    // amber/warning — slightly adjusted
 val RiskMediumBg = Color(0xFFF7EFDC)
-val RiskLow = Color(0xFF6B7A4F)       // olive green
-val RiskLowBg = Color(0xFFE9EEE0)
+val RiskLow = Color(0xFF2E8B57)       // sea green — fits water theme
+val RiskLowBg = Color(0xFFE0F0E8)
 
-// Error (distinct from RiskHigh — used for real app errors, not risk levels)
+// Error (distinct from RiskHigh — used for real app errors)
 val ErrorRed = Color(0xFFA23B2E)

@@ -1,7 +1,10 @@
 package com.sanitova.sanitovacheck
 
-import android.content.Intent
-import android.net.Uri
+import android.annotation.SuppressLint
+import android.webkit.WebChromeClient
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,16 +16,16 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayCircle
-import androidx.compose.material.icons.filled.Book
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -30,105 +33,8 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import com.sanitova.sanitovacheck.ui.theme.*
 
-// --- Data models for educational content ---
-
-data class WashArticle(
-    val id: String,
-    val title: String,
-    val summary: String,
-    val category: String,
-    val icon: ImageVector
-)
-
-data class WashVideo(
-    val title: String,
-    val source: String,
-    val url: String
-)
-
-data class ChatMessage(
-    val text: String,
-    val isUser: Boolean,
-    val isError: Boolean = false
-)
-
-// --- Static content (paraphrased from public WHO/UNICEF guidance) ---
-
-val washArticles = listOf(
-    WashArticle(
-        id = "what_is_wash",
-        title = "What is WASH?",
-        summary = "Water, Sanitation, and Hygiene (WASH) is a cornerstone of public health. Safe drinking water, adequate sanitation, and proper hygiene prevent disease and save lives.",
-        category = "Basics",
-        icon = Icons.Filled.Book
-    ),
-    WashArticle(
-        id = "water_safety",
-        title = "Water Safety & Treatment",
-        summary = "Learn how to assess water quality, common contamination sources, and practical treatment methods including boiling, chlorination, and filtration for field use.",
-        category = "Water",
-        icon = Icons.Filled.Book
-    ),
-    WashArticle(
-        id = "sanitation",
-        title = "Sanitation Systems",
-        summary = "Understand latrine types, sewage management, and safe waste disposal. Key for preventing cholera, dysentery, and soil-transmitted helminths.",
-        category = "Sanitation",
-        icon = Icons.Filled.Book
-    ),
-    WashArticle(
-        id = "handwashing",
-        title = "Hand Hygiene",
-        summary = "Proper handwashing with soap at critical times can reduce diarrheal disease by up to 50%. Learn the 5 key moments and how to promote behavior change.",
-        category = "Hygiene",
-        icon = Icons.Filled.Book
-    ),
-    WashArticle(
-        id = "diseases",
-        title = "Common WASH-Related Diseases",
-        summary = "Cholera, typhoid, dysentery, schistosomiasis, and trachoma are all linked to poor WASH. Learn symptoms, transmission routes, and prevention strategies.",
-        category = "Health",
-        icon = Icons.Filled.Book
-    ),
-    WashArticle(
-        id = "emergency",
-        title = "Emergency WASH Response",
-        summary = "In disasters and humanitarian crises, WASH is critical. Learn about the Sphere Handbook minimum standards, rapid assessments, and priority interventions.",
-        category = "Emergency",
-        icon = Icons.Filled.Book
-    ),
-    WashArticle(
-        id = "clts",
-        title = "Community-Led Total Sanitation",
-        summary = "CLTS is an approach that empowers communities to eliminate open defecation through local action, not external subsidies. Learn triggering techniques and follow-up.",
-        category = "Behavior Change",
-        icon = Icons.Filled.Book
-    )
-)
-
-val washVideos = listOf(
-    WashVideo(
-        title = "WHO: Water, Sanitation and Hygiene",
-        source = "World Health Organization",
-        url = "https://www.youtube.com/@WHO"
-    ),
-    WashVideo(
-        title = "UNICEF WASH Programme",
-        source = "UNICEF",
-        url = "https://www.youtube.com/@unicef"
-    ),
-    WashVideo(
-        title = "Global Handwashing Day",
-        source = "Global Handwashing Partnership",
-        url = "https://globalhandwashing.org/resources/"
-    )
-)
-
-// --- Screen ---
-
 @Composable
-fun LearnScreen() {
-    val context = LocalContext.current
+fun LearnScreen(onOpenArticle: (String) -> Unit) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Articles", "Videos", "Ask AI")
 
@@ -160,33 +66,31 @@ fun LearnScreen() {
         Spacer(Modifier.height(16.dp))
 
         when (selectedTab) {
-            0 -> ArticlesTab()
-            1 -> VideosTab { url ->
-                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-            }
+            0 -> ArticlesTab(onOpenArticle = onOpenArticle)
+            1 -> VideosTab()
             2 -> ChatTab()
         }
     }
 }
 
 @Composable
-private fun ArticlesTab() {
+private fun ArticlesTab(onOpenArticle: (String) -> Unit) {
     LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         items(washArticles) { article ->
-            ArticleCard(article = article)
+            ArticleCard(article = article, onClick = { onOpenArticle(article.id) })
         }
     }
 }
 
 @Composable
-private fun ArticleCard(article: WashArticle) {
-    var expanded by remember { mutableStateOf(false) }
-
+private fun ArticleCard(article: WashArticle, onClick: () -> Unit) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -210,64 +114,80 @@ private fun ArticleCard(article: WashArticle) {
                 article.summary,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = if (expanded) Int.MAX_VALUE else 2,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
-            if (article.summary.length > 100) {
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    if (expanded) "Show less" else "Read more",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.clickable { expanded = !expanded }
-                )
-            }
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "Read full article",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
 
+@SuppressLint("SetJavaScriptEnabled")
 @Composable
-private fun VideosTab(onOpenUrl: (String) -> Unit) {
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+private fun VideosTab() {
+    LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         items(washVideos) { video ->
             Card(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onOpenUrl(video.url) }
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Filled.PlayCircle,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(40.dp)
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Filled.PlayCircle,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(28.dp)
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        Column {
+                            Text(video.title, style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                video.source,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        video.description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Spacer(Modifier.width(14.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(video.title, style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            video.source,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                    Spacer(Modifier.height(12.dp))
+
+                    // Embedded YouTube player via WebView
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.Black)
+                    ) {
+                        AndroidView(
+                            factory = { ctx ->
+                                WebView(ctx).apply {
+                                    settings.javaScriptEnabled = true
+                                    settings.domStorageEnabled = true
+                                    settings.cacheMode = WebSettings.LOAD_DEFAULT
+                                    webViewClient = WebViewClient()
+                                    webChromeClient = WebChromeClient()
+                                    loadUrl(video.embedUrl)
+                                }
+                            },
+                            modifier = Modifier.fillMaxSize()
                         )
                     }
                 }
             }
-        }
-
-        item {
-            Spacer(Modifier.height(8.dp))
-            Text(
-                "Videos open in your browser. All linked sources are official WHO/UNICEF public channels.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }
@@ -436,3 +356,8 @@ private fun ChatBubble(message: ChatMessage) {
         }
     }
 }
+data class ChatMessage(
+    val text: String,
+    val isUser: Boolean,
+    val isError: Boolean = false
+)

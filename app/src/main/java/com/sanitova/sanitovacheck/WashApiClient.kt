@@ -1,11 +1,14 @@
 package com.sanitova.sanitovacheck
 
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import java.util.concurrent.TimeUnit
 
 interface WashApiService {
 
@@ -23,9 +26,16 @@ object WashApiClient {
 
     private const val BASE_URL = "https://wash-risk-agent-hwfcbnykfb.ap-southeast-1.fcapp.run/"
 
+    private val okHttpClient = OkHttpClient.Builder()
+        .connectTimeout(15, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build()
+
     val service: WashApiService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(WashApiService::class.java)

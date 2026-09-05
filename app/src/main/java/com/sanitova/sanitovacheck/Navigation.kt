@@ -16,6 +16,9 @@ sealed class Screen(val route: String) {
     }
     object History : Screen("history")
     object Learn : Screen("learn")
+    object ArticleDetail : Screen("article/{articleId}") {
+        fun createRoute(articleId: String) = "article/$articleId"
+    }
     object Settings : Screen("settings")
     object Paywall : Screen("paywall")
 }
@@ -78,7 +81,19 @@ fun SanitovaCheckNavHost() {
         }
 
         composable(Screen.Learn.route) {
-            LearnScreen()
+            LearnScreen(
+                onOpenArticle = { articleId ->
+                    navController.navigate(Screen.ArticleDetail.createRoute(articleId))
+                }
+            )
+        }
+
+        composable(Screen.ArticleDetail.route) { backStackEntry ->
+            val articleId = backStackEntry.arguments?.getString("articleId") ?: ""
+            ArticleDetailScreen(
+                articleId = articleId,
+                onBack = { navController.popBackStack() }
+            )
         }
 
         composable(Screen.Settings.route) {
