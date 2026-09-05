@@ -21,6 +21,7 @@ sealed class Screen(val route: String) {
         fun createRoute(articleId: String) = "article/$articleId"
     }
     object Settings : Screen("settings")
+    object Auth : Screen("auth")
     object Paywall : Screen("paywall")
 }
 
@@ -108,7 +109,17 @@ fun SanitovaCheckNavHost() {
         }
 
         composable(Screen.Settings.route) {
-            SettingsScreen(onRequirePro = { navController.navigate(Screen.Paywall.route) })
+            SettingsScreen(
+                onRequirePro = { navController.navigate(Screen.Paywall.route) },
+                onOpenAuth = { navController.navigate(Screen.Auth.route) }
+            )
+        }
+
+        composable(Screen.Auth.route) {
+            AuthScreen(
+                onAuthSuccess = { navController.popBackStack() },
+                onBack = { navController.popBackStack() }
+            )
         }
 
         composable(Screen.Paywall.route) {

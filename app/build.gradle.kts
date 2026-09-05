@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -53,8 +54,13 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+
+    // Firebase Auth
+    implementation(libs.firebase.auth)
+    implementation(libs.play.services.auth)
+
     // RevenueCat
-    implementation("com.revenuecat.purchases:purchases:10.1.0") // check RevenueCat dashboard for latest version
+    implementation("com.revenuecat.purchases:purchases:10.1.0")
     implementation("com.revenuecat.purchases:purchases-ui:10.1.0")
 
     // Navigation
@@ -65,10 +71,8 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
 
-    // CameraX (for the Scan screen — add when you build the real camera flow)
+    // CameraX
     implementation("androidx.camera:camera-camera2:1.4.1")
     implementation("androidx.camera:camera-lifecycle:1.4.1")
     implementation("androidx.camera:camera-view:1.4.1")

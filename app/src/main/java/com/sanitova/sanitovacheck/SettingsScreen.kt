@@ -9,6 +9,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.filled.PrivacyTip
+import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
@@ -21,9 +27,13 @@ import androidx.compose.ui.unit.dp
 import com.sanitova.sanitovacheck.ui.theme.*
 
 @Composable
-fun SettingsScreen(onRequirePro: () -> Unit) {
+fun SettingsScreen(
+    onRequirePro: () -> Unit,
+    onOpenAuth: () -> Unit
+) {
     val context = LocalContext.current
     val hasProAccess by SubscriptionRepository.hasProAccess.collectAsState()
+    val currentUser by AuthRepository.currentUser.collectAsState()
 
     LaunchedEffect(Unit) {
         SubscriptionRepository.refreshEntitlementStatus()
@@ -35,23 +45,81 @@ fun SettingsScreen(onRequirePro: () -> Unit) {
         Text("Settings", style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(24.dp))
 
-        if (!hasProAccess) {
-            Card(
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(20.dp)) {
+        // Account card
+        Card(
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                if (currentUser != null) {
                     Text(
-                        "SanitovaCheck Pro",
+                        currentUser!!.displayName ?: currentUser!!.email ?: "Signed in",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    currentUser!!.email?.let { email ->
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            email,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                        )
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedButton(
+                        onClick = { AuthRepository.signOut() },
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Sign Out")
+                    }
+                } else {
+                    Text(
+                        "Account",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        "${FreeScanTracker.remaining(context)} of ${FreeScanTracker.FREE_SCAN_LIMIT} free scans remaining · resets every ${FreeScanTracker.WINDOW_HOURS}h",
+                        "Sign in to sync your scan history across devices",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Button(
+                        onClick = onOpenAuth,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.Login, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Sign In or Create Account")
+                    }
+                }
+            }
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        if (!hasProAccess) {
+            Card(
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text(
+                        "SanitovaCheck Pro",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        "${FreeScanTracker.remaining(context)} of ${FreeScanTracker.FREE_SCAN_LIMIT} free scans remaining · resets every ${FreeScanTracker.WINDOW_HOURS}h",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.height(12.dp))
                     ProBenefitsList()
