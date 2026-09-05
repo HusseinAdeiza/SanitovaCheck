@@ -37,11 +37,11 @@ val washArticles = listOf(
         icon = Icons.Filled.WaterDrop,
         content = """Water, Sanitation, and Hygiene (WASH) refers to three interconnected public health pillars that are essential for human health, dignity, and development.
 
-**Water** means access to safe, sufficient, and affordable water for drinking, cooking, cleaning, and personal hygiene. The World Health Organization recommends a minimum of 20 liters per person per day for basic needs, but many communities in low-resource settings fall far below this threshold.
+Water means access to safe, sufficient, and affordable water for drinking, cooking, cleaning, and personal hygiene. The World Health Organization recommends a minimum of 20 liters per person per day for basic needs, but many communities in low-resource settings fall far below this threshold.
 
-**Sanitation** refers to the safe management of human waste through toilets, latrines, sewage systems, and wastewater treatment. Without proper sanitation, human feces contaminate water sources, soil, and food, spreading deadly diseases.
+Sanitation refers to the safe management of human waste through toilets, latrines, sewage systems, and wastewater treatment. Without proper sanitation, human feces contaminate water sources, soil, and food, spreading deadly diseases.
 
-**Hygiene** covers behaviors and practices that prevent disease transmission — most critically handwashing with soap at key moments (after using the toilet, before eating, before preparing food, after cleaning a child).
+Hygiene covers behaviors and practices that prevent disease transmission — most critically handwashing with soap at key moments (after using the toilet, before eating, before preparing food, after cleaning a child).
 
 Globally, 2 billion people lack safely managed drinking water, 3.6 billion lack safely managed sanitation, and 2 billion lack basic handwashing facilities at home. These gaps disproportionately affect children — diarrheal diseases caused by poor WASH are a leading cause of under-5 mortality worldwide.
 
@@ -66,28 +66,28 @@ WASH interventions are among the most cost-effective public health investments a
         icon = Icons.Filled.WaterDrop,
         content = """Safe drinking water is water that is free from pathogens, chemicals, and physical contaminants that can cause illness. In field settings, water safety involves three key steps: source protection, treatment, and safe storage.
 
-**Common Contamination Sources:**
+Common Contamination Sources:
 - Microbial: Bacteria (E. coli, Vibrio cholerae), viruses (hepatitis A, rotavirus), protozoa (Giardia, Cryptosporidium)
 - Chemical: Nitrates from agriculture, heavy metals from mining, arsenic from geological sources
 - Physical: Turbidity, sediment, debris
 
-**Field Water Treatment Methods:**
+Field Water Treatment Methods:
 
-1. **Boiling** — The most reliable method. Bring water to a rolling boil for at least 1 minute (3 minutes at altitudes above 2,000m). Kills all pathogens including viruses and protozoa. Does not remove chemicals.
+1. Boiling — The most reliable method. Bring water to a rolling boil for at least 1 minute (3 minutes at altitudes above 2,000m). Kills all pathogens including viruses and protozoa. Does not remove chemicals.
 
-2. **Chlorination** — Add chlorine tablets or liquid bleach (sodium hypochlorite) following manufacturer instructions. Effective against bacteria and viruses, but less effective against protozoa like Cryptosporidium. Leave water for 30 minutes before drinking. A residual chlorine level of 0.2–0.5 mg/L indicates proper disinfection.
+2. Chlorination — Add chlorine tablets or liquid bleach (sodium hypochlorite) following manufacturer instructions. Effective against bacteria and viruses, but less effective against protozoa like Cryptosporidium. Leave water for 30 minutes before drinking. A residual chlorine level of 0.2–0.5 mg/L indicates proper disinfection.
 
-3. **Filtration** — Ceramic, sand, or membrane filters remove bacteria, protozoa, and some viruses depending on pore size. Look for filters certified to remove pathogens. Filters do not remove dissolved chemicals.
+3. Filtration — Ceramic, sand, or membrane filters remove bacteria, protozoa, and some viruses depending on pore size. Look for filters certified to remove pathogens. Filters do not remove dissolved chemicals.
 
-4. **Solar Disinfection (SODIS)** — Fill clear plastic bottles with water and leave in direct sunlight for 6 hours (or 2 days if cloudy). UV radiation kills pathogens. Best for small volumes in sunny climates.
+4. Solar Disinfection (SODIS) — Fill clear plastic bottles with water and leave in direct sunlight for 6 hours (or 2 days if cloudy). UV radiation kills pathogens. Best for small volumes in sunny climates.
 
-**Safe Storage:**
+Safe Storage:
 - Use covered, narrow-mouth containers
 - Keep containers elevated off the ground
 - Clean containers regularly with soap and safe water
 - Do not dip hands or utensils into stored water
 
-**Water Quality Testing:**
+Water Quality Testing:
 - Turbidity: Water should be clear; cloudiness indicates contamination
 - Smell: No foul odors
 - Taste: No unusual tastes
@@ -112,29 +112,29 @@ WASH interventions are among the most cost-effective public health investments a
         icon = Icons.Filled.Recycling,
         content = """Proper sanitation prevents human waste from contaminating the environment, water sources, and food. Without sanitation, diseases like cholera, dysentery, typhoid, and soil-transmitted helminths (intestinal worms) spread rapidly.
 
-**The F-Diagram of Disease Transmission:**
+The F-Diagram of Disease Transmission:
 Feces can reach the mouth through: Fluids (water), Fingers, Flies, Fields (soil), and Food. Proper sanitation breaks all these pathways.
 
-**Types of Sanitation Systems:**
+Types of Sanitation Systems:
 
-1. **Pit Latrines** — Simple, low-cost. A hole in the ground with a slab and superstructure. Must be located at least 30 meters from water sources and downhill from them. Needs regular emptying or abandonment and replacement when full.
+1. Pit Latrines — Simple, low-cost. A hole in the ground with a slab and superstructure. Must be located at least 30 meters from water sources and downhill from them. Needs regular emptying or abandonment and replacement when full.
 
-2. **Ventilated Improved Pit (VIP) Latrines** — A pit latrine with a vent pipe that draws air out, reducing odors and fly problems. The pipe should be painted black and exposed to sunlight to create thermal updraft.
+2. Ventilated Improved Pit (VIP) Latrines — A pit latrine with a vent pipe that draws air out, reducing odors and fly problems. The pipe should be painted black and exposed to sunlight to create thermal updraft.
 
-3. **Pour-Flush Latrines** — Uses 1–3 liters of water per flush to move waste into a pit or septic tank. More hygienic than dry pit latrines but requires a reliable water source.
+3. Pour-Flush Latrines — Uses 1–3 liters of water per flush to move waste into a pit or septic tank. More hygienic than dry pit latrines but requires a reliable water source.
 
-4. **Septic Tanks** — Watertight tanks that receive wastewater from flush toilets. Solids settle and are partially digested by bacteria. Effluent flows to a soak pit or drainage field. Must be emptied every 2–5 years.
+4. Septic Tanks — Watertight tanks that receive wastewater from flush toilets. Solids settle and are partially digested by bacteria. Effluent flows to a soak pit or drainage field. Must be emptied every 2–5 years.
 
-5. **Composting Toilets** — Separates liquid and solid waste. Solids are mixed with carbon material (sawdust, ash) and composted. After 6–12 months, the compost can be used safely as fertilizer.
+5. Composting Toilets — Separates liquid and solid waste. Solids are mixed with carbon material (sawdust, ash) and composted. After 6–12 months, the compost can be used safely as fertilizer.
 
-**Key Design Principles:**
+Key Design Principles:
 - Minimum 30 meters from any water source
 - Downhill from water sources
 - Fly-proof (tight-fitting lid, mesh screen on vents)
 - Easy to clean
 - Accessible to all users including children, elderly, and people with disabilities
 
-**Excreta Management in Emergencies:**
+Excreta Management in Emergencies:
 In disasters and refugee camps, the Sphere Handbook recommends:
 - Maximum 50 people per toilet in emergency phase
 - Maximum 20 people per toilet in stabilized settings
@@ -160,14 +160,14 @@ In disasters and refugee camps, the Sphere Handbook recommends:
         icon = Icons.Filled.CleanHands,
         content = """Handwashing with soap is one of the most effective and inexpensive ways to prevent disease. It can reduce diarrheal disease by up to 50% and respiratory infections by up to 25%. Yet globally, 2 billion people lack basic handwashing facilities at home.
 
-**The 5 Key Moments for Handwashing:**
+The 5 Key Moments for Handwashing:
 1. After using the toilet or cleaning a child
 2. Before eating or handling food
 3. Before feeding a child
 4. After handling animals or animal waste
 5. After coughing, sneezing, or blowing your nose
 
-**Proper Handwashing Technique (WHO 6 Steps):**
+Proper Handwashing Technique (WHO 6 Steps):
 1. Wet hands with safe water
 2. Apply enough soap to cover all hand surfaces
 3. Rub hands palm to palm
@@ -179,16 +179,16 @@ In disasters and refugee camps, the Sphere Handbook recommends:
 9. Rinse thoroughly with safe water
 10. Dry hands completely with a clean towel or air dry
 
-**When Soap and Water Are Not Available:**
+When Soap and Water Are Not Available:
 Alcohol-based hand rub (at least 60% alcohol) is an effective alternative. Apply a palmful and rub all surfaces until dry (approximately 20–30 seconds). Note: Alcohol rubs are NOT effective against spores, parasites like Giardia, or when hands are visibly dirty.
 
-**Promoting Behavior Change in Communities:**
-- **Community-Led Total Sanitation (CLTS):** Communities map open defecation areas and calculate health costs, triggering collective action.
-- **School WASH Programs:** Install handwashing stations, integrate hygiene into curriculum, form student hygiene clubs.
-- **Household Visits:** Health workers demonstrate proper technique, address barriers (cost of soap, water access), and follow up.
-- **Social Norms:** Use community champions, religious leaders, and local media to make handwashing a social expectation.
+Promoting Behavior Change in Communities:
+- Community-Led Total Sanitation (CLTS): Communities map open defecation areas and calculate health costs, triggering collective action.
+- School WASH Programs: Install handwashing stations, integrate hygiene into curriculum, form student hygiene clubs.
+- Household Visits: Health workers demonstrate proper technique, address barriers (cost of soap, water access), and follow up.
+- Social Norms: Use community champions, religious leaders, and local media to make handwashing a social expectation.
 
-**Common Barriers and Solutions:**
+Common Barriers and Solutions:
 - No soap → Provide soap or teach local soap-making
 - No water → Install tippy-taps (simple handwashing stations using minimal water)
 - No time → Place handwashing stations at toilet exits and kitchen entrances
@@ -213,43 +213,43 @@ Alcohol-based hand rub (at least 60% alcohol) is an effective alternative. Apply
         icon = Icons.Filled.Medication,
         content = """Poor WASH conditions are directly responsible for a significant burden of disease worldwide. Here are the most common and serious WASH-related diseases, their symptoms, and how to prevent them.
 
-**Cholera**
+Cholera
 - Cause: Vibrio cholerae bacteria in contaminated water or food
 - Symptoms: Sudden onset of profuse watery diarrhea ("rice water stools"), vomiting, rapid dehydration, can kill within hours
 - Prevention: Boil or chlorinate drinking water, proper sanitation, handwashing, oral cholera vaccination in outbreak settings
 - Treatment: Immediate oral rehydration salts (ORS) or IV fluids, antibiotics for severe cases
 
-**Typhoid Fever**
+Typhoid Fever
 - Cause: Salmonella typhi bacteria in contaminated water or food
 - Symptoms: Sustained high fever, headache, abdominal pain, rose spots on chest, constipation or diarrhea
 - Prevention: Safe water, proper sanitation, food hygiene, vaccination
 - Treatment: Antibiotics (azithromycin or ceftriaxone), hydration
 
-**Dysentery (Bloody Diarrhea)**
+Dysentery (Bloody Diarrhea)
 - Cause: Shigella bacteria or Entamoeba histolytica parasite
 - Symptoms: Bloody diarrhea, abdominal cramps, fever, tenesmus (painful straining)
 - Prevention: Safe water, sanitation, handwashing, safe food preparation
 - Treatment: ORS, antibiotics for bacterial dysentery, metronidazole for amoebic dysentery
 
-**Soil-Transmitted Helminths (Intestinal Worms)**
+Soil-Transmitted Helminths (Intestinal Worms)
 - Cause: Ascaris, hookworm, whipworm eggs in soil contaminated with human feces
 - Symptoms: Malnutrition, anemia (especially from hookworm), stunted growth, cognitive impairment in children
 - Prevention: Sanitation (toilets that contain feces), wearing shoes, handwashing, mass drug administration (MDA) programs
 - Treatment: Albendazole or mebendazole
 
-**Schistosomiasis (Bilharzia)**
+Schistosomiasis (Bilharzia)
 - Cause: Schistosoma parasites released by freshwater snails
 - Symptoms: Blood in urine (S. haematobium) or blood in stool (S. mansoni), abdominal pain, liver damage, increased risk of bladder cancer
 - Prevention: Avoid contact with infested freshwater, proper sanitation to prevent egg contamination of water, snail control, MDA with praziquantel
 - Treatment: Praziquantel
 
-**Trachoma**
+Trachoma
 - Cause: Chlamydia trachomatis bacteria spread by flies and contaminated fingers
 - Symptoms: Repeated eye infections leading to scarring, eyelashes turning inward (trichiasis), blindness
 - Prevention: Face washing, sanitation to reduce fly breeding, mass antibiotic distribution (azithromycin), surgery for trichiasis
 - Treatment: Azithromycin, eyelid surgery for advanced cases
 
-**Key Prevention Strategy:**
+Key Prevention Strategy:
 All these diseases share the same transmission pathway: the fecal-oral route. Breaking this cycle through safe water, sanitation, and hygiene prevents them all simultaneously.""",
         keyTakeaways = listOf(
             "Cholera can kill within hours — prioritize safe water and rapid rehydration",
@@ -271,27 +271,27 @@ All these diseases share the same transmission pathway: the fecal-oral route. Br
         icon = Icons.Filled.Warning,
         content = """In emergencies — natural disasters, conflicts, disease outbreaks — WASH is one of the most urgent and lifesaving interventions. Within days of a disaster, populations displaced from their homes lose access to safe water and sanitation, creating ideal conditions for disease outbreaks.
 
-**Sphere Handbook Minimum Standards:**
+Sphere Handbook Minimum Standards:
 The Sphere Handbook is the globally recognized set of minimum standards for humanitarian response. For WASH, the key standards include:
 
-1. **Water Supply:**
+1. Water Supply:
    - 15 liters per person per day (emergency minimum)
    - Maximum 250 people per water point
    - Water source no more than 500 meters from shelter
    - Water quality meets WHO guidelines (turbidity <5 NTU, zero E. coli)
 
-2. **Excreta Disposal:**
+2. Excreta Disposal:
    - Maximum 50 people per toilet in immediate phase
    - Maximum 20 people per toilet in stabilized phase
    - Separate toilets for women and men
    - Safe, culturally appropriate locations with lighting and locks
 
-3. **Hygiene Promotion:**
+3. Hygiene Promotion:
    - Hygiene kits distributed (soap, water containers, menstrual hygiene materials)
    - Community mobilization for safe excreta disposal
    - Handwashing promotion at critical locations
 
-**Rapid WASH Assessment (First 72 Hours):**
+Rapid WASH Assessment (First 72 Hours):
 - Map water sources, assess contamination risk
 - Count existing sanitation facilities and usage
 - Identify open defecation areas
@@ -299,7 +299,7 @@ The Sphere Handbook is the globally recognized set of minimum standards for huma
 - Identify vulnerable groups (women, children, elderly, disabled)
 - Check drainage and vector breeding sites
 
-**Priority Interventions by Phase:**
+Priority Interventions by Phase:
 
 *Immediate (Days 0–7):*
 - Water trucking or emergency water treatment
@@ -321,7 +321,7 @@ The Sphere Handbook is the globally recognized set of minimum standards for huma
 - Hand over management to local authorities or communities
 - Integrate WASH with health and nutrition programs
 
-**Outbreak Response:**
+Outbreak Response:
 During cholera or other disease outbreaks:
 - Increase water supply to 20+ liters per person per day
 - Set up oral rehydration points
@@ -348,38 +348,38 @@ During cholera or other disease outbreaks:
         icon = Icons.Filled.Groups,
         content = """Community-Led Total Sanitation (CLTS) is an innovative approach that empowers communities to completely eliminate open defecation (OD) through their own initiative, without relying on external subsidies for toilet construction. Developed in Bangladesh in 2000 by Dr. Kamal Kar, CLTS has been successfully implemented in over 60 countries.
 
-**Core Principles:**
-1. **No Subsidies for Toilets:** External agencies do not build toilets for households. Communities design and build their own using local materials.
-2. **Community-Led:** The community identifies the problem, feels shame/embarrassment (the "trigger"), and collectively decides to stop open defecation.
-3. **Total Sanitation:** The goal is not just building toilets but achieving an Open Defecation Free (ODF) status for the entire community.
+Core Principles:
+1. No Subsidies for Toilets: External agencies do not build toilets for households. Communities design and build their own using local materials.
+2. Community-Led: The community identifies the problem, feels shame/embarrassment (the "trigger"), and collectively decides to stop open defecation.
+3. Total Sanitation: The goal is not just building toilets but achieving an Open Defecation Free (ODF) status for the entire community.
 
-**The Triggering Process:**
+The Triggering Process:
 
-1. **Pre-Triggering:** Build rapport with community leaders, map the area, identify natural leaders.
+1. Pre-Triggering: Build rapport with community leaders, map the area, identify natural leaders.
 
-2. **Defecation Area Mapping:** Facilitators guide community members (including children) to map where they defecate. The map reveals that everyone knows where feces are — including near water sources, paths, and homes.
+2. Defecation Area Mapping: Facilitators guide community members (including children) to map where they defecate. The map reveals that everyone knows where feces are — including near water sources, paths, and homes.
 
-3. **Transect Walk:** Walk through the community to visit open defecation areas. Facilitators ask: "Do you see flies? Where do they go after visiting feces?" Flies carry feces to food, water, and faces.
+3. Transect Walk: Walk through the community to visit open defecation areas. Facilitators ask: "Do you see flies? Where do they go after visiting feces?" Flies carry feces to food, water, and faces.
 
-4. **Fecal Calculations:** Calculate how much feces the community produces daily. Example: 500 people × 200g = 100kg of feces per day. Ask: "Where does it all go?"
+4. Fecal Calculations: Calculate how much feces the community produces daily. Example: 500 people × 200g = 100kg of feces per day. Ask: "Where does it all go?"
 
-5. **The Spark/Trigger:** Someone usually says, "We are eating each other's shit." This moment of collective realization and shame is the trigger.
+5. The Spark/Trigger: Someone usually says, "We are eating each other's shit." This moment of collective realization and shame is the trigger.
 
-6. **Action Planning:** The community immediately plans where to build latrines, who will help whom, and sets a deadline for ODF.
+6. Action Planning: The community immediately plans where to build latrines, who will help whom, and sets a deadline for ODF.
 
-**ODF Verification Criteria:**
+ODF Verification Criteria:
 - No visible human feces in the community
 - Every household has a latrine
 - Latrines are used by all family members
 - Handwashing facilities available near latrines
 - Community has systems for maintaining facilities
 
-**Challenges and Solutions:**
-- **Slippage (return to OD):** Regular follow-up visits, community monitoring, celebrate ODF anniversaries
-- **Hard-to-reach households:** Identify barriers (disability, poverty, isolation) and provide targeted support
-- **Scale:** Move from village to district-wide ODF through government partnerships and local institutions
+Challenges and Solutions:
+- Slippage (return to OD): Regular follow-up visits, community monitoring, celebrate ODF anniversaries
+- Hard-to-reach households: Identify barriers (disability, poverty, isolation) and provide targeted support
+- Scale: Move from village to district-wide ODF through government partnerships and local institutions
 
-**Success Stories:**
+Success Stories:
 India's Swachh Bharat Mission used CLTS principles to declare over 600,000 villages ODF. Bangladesh reduced OD from 34% to less than 1% over two decades.""",
         keyTakeaways = listOf(
             "CLTS uses shame/embarrassment to trigger community action — no toilet subsidies",
@@ -401,42 +401,42 @@ India's Swachh Bharat Mission used CLTS principles to declare over 600,000 villa
         icon = Icons.Filled.HealthAndSafety,
         content = """Menstrual Hygiene Management (MHM) refers to the access to clean materials, private facilities, and adequate information to manage menstruation safely and with dignity. Poor MHM leads to health risks, school absenteeism, and social exclusion.
 
-**Health Risks of Poor MHM:**
+Health Risks of Poor MHM:
 - Reproductive tract infections from unhygienic materials
 - Toxic shock syndrome from prolonged use of absorbent materials
 - Urinary tract infections
 - Skin irritation and rashes
 
-**Essential MHM Requirements:**
+Essential MHM Requirements:
 
-1. **Safe Materials:**
+1. Safe Materials:
    - Disposable pads, reusable cloth pads, menstrual cups, or tampons
    - Materials must be absorbent, comfortable, and changed every 4–6 hours
    - Reusable materials must be washed with soap and dried in sunlight
 
-2. **Private Facilities:**
+2. Private Facilities:
    - Lockable, gender-segregated toilets
    - Water and soap inside or very near the toilet
    - Private washing and drying areas for reusable materials
    - Disposal bins for used materials
 
-3. **Knowledge and Information:**
+3. Knowledge and Information:
    - Accurate information about menstruation, what is normal, and when to seek help
    - Boys and men should also be educated to reduce stigma
    - Information delivered through schools, health workers, and peer groups
 
-**MHM in Schools:**
+MHM in Schools:
 - Lack of MHM facilities is a major reason girls miss school during menstruation
 - WHO/UNICEF recommends: separate toilets for girls, water and soap, disposal facilities, and menstrual supplies
 - In some countries, girls miss 20% of school days due to poor MHM
 
-**Breaking the Stigma:**
+Breaking the Stigma:
 - Menstruation is a normal biological process — not dirty or shameful
 - Engage religious and community leaders to speak positively about MHM
 - Include boys and men in MHM education to foster support
 - Use local media, drama, and art to normalize the conversation
 
-**Emergency MHM:**
+Emergency MHM:
 In humanitarian settings, distribute dignity kits containing: sanitary pads, soap, underwear, and a carrying pouch. Ensure women and girls are consulted about their preferences.""",
         keyTakeaways = listOf(
             "Change menstrual materials every 4–6 hours to prevent infection",

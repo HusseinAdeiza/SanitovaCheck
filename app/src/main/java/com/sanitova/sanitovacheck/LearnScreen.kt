@@ -178,6 +178,46 @@ private fun VideosTab() {
                                     settings.javaScriptEnabled = true
                                     settings.domStorageEnabled = true
                                     settings.cacheMode = WebSettings.LOAD_DEFAULT
+                                    settings.mediaPlaybackRequiresUserGesture = false
+                                    // Use desktop user-agent to prevent mobile app redirects
+                                    settings.userAgentString = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                                    webChromeClient = WebChromeClient()
+                                    webViewClient = object : WebViewClient() {
+                                        override fun shouldOverrideUrlLoading(view: WebView?, request: android.webkit.WebResourceRequest?): Boolean {
+                                            val url = request?.url?.toString() ?: return false
+                                            // Block intent:// and market:// URLs that try to open external apps
+                                            return url.startsWith("intent://") || url.startsWith("market://") || url.startsWith("vnd.youtube://")
+                                        }
+                                    }
+                                    val html = """
+                                        <html><head>
+                                        <meta name="viewport" content="width=device-width, initial-scale=1">
+                                        <style>body{margin:0;padding:0;overflow:hidden;background:#000;}
+                                        iframe{width:100%;height:100%;border:0;}</style>
+                                        </head><body>
+                                        <iframe src="${video.embedUrl}?rel=0&modestbranding=1&playsinline=1" 
+                                        allowfullscreen allow="autoplay; encrypted-media"></iframe>
+                                        </body></html>
+                                    """.trimIndent()
+                                    loadDataWithBaseURL("https://www.youtube.com", html, "text/html", "UTF-8", null)
+                                }
+                            },
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.Black)
+                    ) {
+                        AndroidView(
+                            factory = { ctx ->
+                                WebView(ctx).apply {
+                                    settings.javaScriptEnabled = true
+                                    settings.domStorageEnabled = true
+                                    settings.cacheMode = WebSettings.LOAD_DEFAULT
                                     webViewClient = WebViewClient()
                                     webChromeClient = WebChromeClient()
                                     loadUrl(video.embedUrl)
