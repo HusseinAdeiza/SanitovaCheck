@@ -68,7 +68,10 @@ fun SettingsScreen(
                     }
                     Spacer(Modifier.height(12.dp))
                     OutlinedButton(
-                        onClick = { AuthRepository.signOut() },
+                        onClick = {
+                            AuthRepository.signOut()
+                            onOpenAuth()
+                        },
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
