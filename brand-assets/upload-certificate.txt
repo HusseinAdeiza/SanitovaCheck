@@ -1,0 +1,45 @@
+Upload Keystore Certificate for Google Play Console Key Reset
+===============================================================
+
+This certificate was extracted from the NEW upload keystore created on 2026-09-05.
+Since the original upload keystore was lost, a key reset must be requested in Play Console.
+
+Keystore Details:
+- File: app/sanitova-upload.keystore
+- Alias: sanitova
+- Store Password: Sanitova2024!
+- Key Password: Sanitova2024!
+- Created: 2026-09-05
+
+Certificate (PEM format):
+-----BEGIN CERTIFICATE-----
+MIIDgDCCAmigAwIBAgIJAMjFTZ6dR2NsMA0GCSqGSIb3DQEBCwUAMG0xCzAJBgNV
+BAYTAk5HMTMwMQYDVQQKDCpTYW5pdG92YSBFbnZpcm9ubWVudGFsIEhlYWx0aCBT
+ZXJ2aWNlcyBMdGQxETAPBgNVBAsMCFNhbml0b3ZhMRYwFAYDVQQDDA1TYW5pdG92
+YUNoZWNrMB4XDTI2MDkwNjA3NTAwN1oXDTU0MDEyMjA3NTAwN1owbTELMAkGA1UE
+BhMCTkcxMzAxBgNVBAoMKlNhbml0b3ZhIEVudmlyb25tZW50YWwgSGVhbHRoIFNl
+cnZpY2VzIEx0ZDERMA8GA1UECwwIU2FuaXRvdmExFjAUBgNVBAMMDVNhbml0b3Zh
+Q2hlY2swggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCodID3lN3nHbmZ
+ZykUJLTgMQbDvojHauM48OMuZD4scsRIIu1l1EwSPp68Nfjn342giy0L3zVPdM65
+bp7aIypfyCFRlx0XxqqI4vuoO0a0TELH8OMj8u4iX7KBC6tX9z/ahFWwHG+kbMgf
+Fk59i0aDvRwvsAbX2bsuyMasOnVmBp0veci1a9291jPLtxtKnbygJ8hVU5HpNbzc
+O1PeeJtOqL7cXM5x0jXTs9PNBbC6sYdfHM7OL1oLSkaFOpBqwanme2f422ZYU2ao
+edShshz1DXvgvyBxwQVXmsFjirfgZXmo6DMvGOxvg+d/n49FUhiitbi13ZWRWZmd
+mjFVQ0SvAgMBAAGjITAfMB0GA1UdDgQWBBQbFv2KScmat6E+lHoSW/GKI4ismzAN
+BgkqhkiG9w0BAQsFAAOCAQEAasEQQk3Hbq/we0o+KiKfvh3OQ8mYgPofaHsdajdh
+hstNjmIr9aguaMX9ETt6soUucjC1xX5yDoQDLTzXEZWBzdO9oSC5IOMR8mHLsc7F
+VVM39ummNmMwkzui3QCZrzIyMrShW4bEXFz9dcqC6uWiI7pUZkEi8tUXoXsuCCud
+9U062WTyJOFUrJQK+PcDHstiPIKpoaEx4v1I1YCUOERmrv+v7aZUl8NLpRJ6ux8i
+/Nz8SZnlX6ZV+P2V7Q4uuFWyDTR7bkqObcr5wycxSNlpIwFsoQuN26sSS0i/TWFv
+/hLAOr3AndAJZLV54z4NSXJ07j3ovE+92CelTQI7wqoC
+-----END CERTIFICATE-----
+
+Certificate Fingerprint (SHA-256):
+Please run: keytool -list -v -keystore app/sanitova-upload.keystore -alias sanitova
+
+Instructions for Play Console Key Reset:
+1. Go to Google Play Console → App → Setup → App integrity
+2. Click "Request key upgrade" or contact Play Console support
+3. Provide the certificate above (or upload the .der/.pem file)
+4. Wait for approval (typically 1-2 business days)
+5. Once approved, upload the AAB signed with this keystore
