@@ -462,18 +462,18 @@ val washVideos = listOf(
         watchUrl = "https://www.youtube.com/watch?v=IisgnbMfKvI"
     ),
     WashVideo(
-        title = "What You Need To Know About Handwashing",
-        source = "CDC",
-        description = "Centers for Disease Control and Prevention guide on why handwashing matters, when to do it, and how to do it correctly to protect yourself and others.",
-        embedUrl = "https://www.youtube-nocookie.com/embed/d914EnpU4Fo",
-        watchUrl = "https://www.youtube.com/watch?v=d914EnpU4Fo"
+        title = "7 Steps of Handwashing",
+        source = "Health Education",
+        description = "Clear demonstration of the seven steps of proper handwashing with soap and water — a fundamental skill for preventing infectious diseases.",
+        embedUrl = "https://www.youtube-nocookie.com/embed/TClRYmtqClM",
+        watchUrl = "https://www.youtube.com/watch?v=TClRYmtqClM"
     ),
     WashVideo(
-        title = "Handwashing Song",
-        source = "UNICEF Australia & The Wiggles",
-        description = "A fun, child-friendly handwashing song to teach children how to wash their hands with soap — released for Global Handwashing Day by UNICEF.",
-        embedUrl = "https://www.youtube-nocookie.com/embed/DJD9zPv2NmM",
-        watchUrl = "https://www.youtube.com/watch?v=DJD9zPv2NmM"
+        title = "Clean Your Hands — Prevent Infection",
+        source = "Centre for Health Protection",
+        description = "Public health video on why hand hygiene matters and how proper handwashing prevents infections in community and healthcare settings.",
+        embedUrl = "https://www.youtube-nocookie.com/embed/-5Iq2k6O3AY",
+        watchUrl = "https://www.youtube.com/watch?v=-5Iq2k6O3AY"
     ),
     WashVideo(
         title = "Hand Hygiene — Epidemic Prevention",
