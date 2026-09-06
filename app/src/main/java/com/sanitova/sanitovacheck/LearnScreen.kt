@@ -18,12 +18,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.SubcomposeAsyncImage
+import coil.compose.AsyncImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -126,6 +127,33 @@ private fun ArticleCard(article: WashArticle, onClick: () -> Unit) {
 }
 
 /**
+ * Generate a stable gradient brush for a video card based on its title.
+ * This ensures each video always gets the same colors, creating visual variety.
+ */
+@Composable
+private fun videoGradient(title: String): Brush {
+    val colors = listOf(
+        Pair(Color(0xFF0077B6), Color(0xFF00B4D8)),   // Ocean blue
+        Pair(Color(0xFF023E8A), Color(0xFF0096C7)),   // Deep water
+        Pair(Color(0xFF48CAE4), Color(0xFF90E0EF)),   // Light aqua
+        Pair(Color(0xFF0A9396), Color(0xFF005F73)),   // Teal
+        Pair(Color(0xFF028090), Color(0xFF00A896)),   // Sea green
+        Pair(Color(0xFF277DA1), Color(0xFF4D908E)),   // Muted blue
+        Pair(Color(0xFF1D3557), Color(0xFF457B9D)),   // Navy
+        Pair(Color(0xFF006D77), Color(0xFF83C5BE)),   // Sage water
+        Pair(Color(0xFF264653), Color(0xFF2A9D8F)),   // Dark teal
+        Pair(Color(0xFF1A659E), Color(0xFFFF6B35)),   // Blue to orange (contrast)
+    )
+    val index = title.hashCode().mod(colors.size).let { if (it < 0) it + colors.size else it }
+    val (start, end) = colors[index]
+    return Brush.linearGradient(
+        colors = listOf(start, end),
+        start = androidx.compose.ui.geometry.Offset(0f, 0f),
+        end = androidx.compose.ui.geometry.Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
+    )
+}
+
+/**
  * Extract YouTube video ID from various URL formats.
  */
 private fun extractYouTubeVideoId(url: String): String? {
@@ -147,156 +175,114 @@ private fun VideosTab() {
     LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         items(washVideos) { video ->
             val videoId = remember(video.embedUrl) { extractYouTubeVideoId(video.embedUrl) }
-            // Use hqdefault (320x180) thumbnail — reliable and loads fast
             val thumbnailUrl = videoId?.let { "https://img.youtube.com/vi/$it/hqdefault.jpg" }
+            val gradient = videoGradient(video.title)
 
             Card(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Filled.PlayCircle,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(28.dp)
-                        )
-                        Spacer(Modifier.width(10.dp))
-                        Column {
-                            Text(video.title, style = MaterialTheme.typography.titleMedium)
-                            Text(
-                                video.source,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        video.description,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.height(12.dp))
-
-                    // Thumbnail with play button overlay
-                    if (thumbnailUrl != null) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color.Black)
-                                .clickable {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(video.watchUrl))
-                                    context.startActivity(intent)
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            SubcomposeAsyncImage(
+                Column {
+                    // Video preview area: gradient background + optional thumbnail overlay + play button
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                            .background(gradient)
+                            .clickable {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(video.watchUrl))
+                                context.startActivity(intent)
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        // Try to load thumbnail as an enhancement (if it fails, gradient still shows)
+                        if (thumbnailUrl != null) {
+                            AsyncImage(
                                 model = thumbnailUrl,
-                                contentDescription = video.title,
+                                contentDescription = null,
                                 contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize(),
-                                loading = {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier.size(32.dp),
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-                                },
-                                error = {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                            Icon(
-                                                Icons.Filled.PlayCircle,
-                                                contentDescription = null,
-                                                tint = Color.White,
-                                                modifier = Modifier.size(48.dp)
-                                            )
-                                            Spacer(Modifier.height(8.dp))
-                                            Text(
-                                                "Tap to watch on YouTube",
-                                                color = Color.White,
-                                                style = MaterialTheme.typography.bodySmall
-                                            )
-                                        }
-                                    }
-                                }
+                                modifier = Modifier.fillMaxSize()
                             )
-
-                            // Dark overlay for better play button visibility
+                            // Gradient overlay so text/play button is always visible
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(Color.Black.copy(alpha = 0.25f))
+                                    .background(
+                                        Brush.verticalGradient(
+                                            colors = listOf(
+                                                Color.Black.copy(alpha = 0.1f),
+                                                Color.Black.copy(alpha = 0.5f)
+                                            )
+                                        )
+                                    )
                             )
-
-                            // Play button
-                            Box(
-                                modifier = Modifier
-                                    .size(64.dp)
-                                    .clip(RoundedCornerShape(32.dp))
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    Icons.Filled.PlayCircle,
-                                    contentDescription = "Play",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(40.dp)
-                                )
-                            }
                         }
-                    } else {
-                        // Fallback if no video ID could be extracted
+
+                        // Play button (always visible)
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color.DarkGray),
+                                .size(64.dp)
+                                .clip(RoundedCornerShape(32.dp))
+                                .background(Color.White.copy(alpha = 0.9f)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(
-                                    Icons.Filled.PlayCircle,
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(48.dp)
-                                )
-                                Spacer(Modifier.height(8.dp))
-                                Text(
-                                    "Video preview unavailable",
-                                    color = Color.White,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
+                            Icon(
+                                Icons.Filled.PlayCircle,
+                                contentDescription = "Play",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(40.dp)
+                            )
+                        }
+
+                        // Source badge (bottom-left)
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .padding(12.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color.Black.copy(alpha = 0.6f))
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                video.source,
+                                color = Color.White,
+                                style = MaterialTheme.typography.labelSmall
+                            )
                         }
                     }
 
-                    Spacer(Modifier.height(8.dp))
-                    OutlinedButton(
-                        onClick = {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(video.watchUrl))
-                            context.startActivity(intent)
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Icon(Icons.Filled.PlayCircle, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text("Open in YouTube app")
+                    // Text content below the video area
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            video.title,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            video.description,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        Button(
+                            onClick = {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(video.watchUrl))
+                                context.startActivity(intent)
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(
+                                Icons.Filled.PlayCircle,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text("Watch on YouTube")
+                        }
                     }
                 }
             }
