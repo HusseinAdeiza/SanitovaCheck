@@ -147,8 +147,8 @@ private fun VideosTab() {
     LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         items(washVideos) { video ->
             val videoId = remember(video.embedUrl) { extractYouTubeVideoId(video.embedUrl) }
-            // Use mqdefault (320x180) thumbnail — reliable and loads fast
-            val thumbnailUrl = videoId?.let { "https://img.youtube.com/vi/$it/mqdefault.jpg" }
+            // Use hqdefault (320x180) thumbnail — reliable and loads fast
+            val thumbnailUrl = videoId?.let { "https://img.youtube.com/vi/$it/hqdefault.jpg" }
 
             Card(
                 shape = RoundedCornerShape(16.dp),
