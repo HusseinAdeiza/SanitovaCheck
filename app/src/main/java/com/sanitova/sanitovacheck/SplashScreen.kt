@@ -1,7 +1,5 @@
 package com.sanitova.sanitovacheck
 
-import android.net.Uri
-import androidx.annotation.OptIn
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,51 +12,17 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
-import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.AspectRatioFrameLayout
-import androidx.media3.ui.PlayerView
 import com.sanitova.sanitovacheck.ui.theme.*
 import kotlinx.coroutines.delay
 
-private const val SPLASH_DURATION_MS = 8000L
+private const val SPLASH_DURATION_MS = 5000L
 
-@OptIn(UnstableApi::class)
 @Composable
 fun SplashScreen(onFinished: () -> Unit) {
-    val context = LocalContext.current
-    var showFallback by remember { mutableStateOf(false) }
     var progress by remember { mutableFloatStateOf(0f) }
-
-    // Try to set up ExoPlayer; fall back if video file is missing
-    val exoPlayer = remember(context) {
-        try {
-            val rawId = context.resources.getIdentifier("splash_video", "raw", context.packageName)
-            if (rawId == 0) {
-                showFallback = true
-                null
-            } else {
-                val player = ExoPlayer.Builder(context).build().apply {
-                    setMediaItem(MediaItem.fromUri(Uri.parse("android.resource://${context.packageName}/$rawId")))
-                    prepare()
-                    playWhenReady = true
-                    repeatMode = Player.REPEAT_MODE_OFF
-                }
-                player
-            }
-        } catch (_: Exception) {
-            showFallback = true
-            null
-        }
-    }
 
     // Auto-advance timer (also drives progress bar)
     LaunchedEffect(Unit) {
@@ -70,22 +34,6 @@ fun SplashScreen(onFinished: () -> Unit) {
         }
         progress = 1f
         onFinished()
-    }
-
-    // Listen for video end
-    DisposableEffect(exoPlayer) {
-        val listener = object : Player.Listener {
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                if (playbackState == Player.STATE_ENDED) {
-                    onFinished()
-                }
-            }
-        }
-        exoPlayer?.addListener(listener)
-        onDispose {
-            exoPlayer?.removeListener(listener)
-            exoPlayer?.release()
-        }
     }
 
     Box(
@@ -101,21 +49,7 @@ fun SplashScreen(onFinished: () -> Unit) {
                 )
             )
     ) {
-        if (exoPlayer != null && !showFallback) {
-            AndroidView(
-                factory = { ctx ->
-                    PlayerView(ctx).apply {
-                        player = exoPlayer
-                        useController = false
-                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
-                        setShowBuffering(PlayerView.SHOW_BUFFERING_NEVER)
-                    }
-                },
-                modifier = Modifier.fillMaxSize()
-            )
-        } else {
-            SplashFallbackAnimation()
-        }
+        SplashFallbackAnimation()
 
         // Bottom progress bar
         LinearProgressIndicator(

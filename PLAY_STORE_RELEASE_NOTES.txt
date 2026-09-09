@@ -1,0 +1,44 @@
+SanitovaCheck v1.1.0 — Play Store Release Notes
+===============================================
+
+Short description (80 chars):
+WASH education, AI assistant & water risk scanning for healthier communities.
+
+Full description:
+SanitovaCheck is your all-in-one WASH (Water, Sanitation, and Hygiene) companion. 
+Learn from WHO/UNICEF/CDC educational content, ask our AI health assistant, and 
+scan water sources for contamination risks.
+
+Version 1.1.0 — What's New
+--------------------------
+
+🎨 Fresh Design
+• New water-themed UI with professional blue gradient palette
+• New 3D app icon reflecting our WASH mission
+
+🔐 Mandatory Sign Up / Log In
+• Firebase Authentication now required before using the app
+• Secure email & password sign-up
+• Sign out option in Settings
+
+📚 Enhanced WASH Education
+• Full-length WHO/UNICEF/CDC articles with references
+• 10 verified educational videos on handwashing, cholera prevention, safe water, and sanitation
+• Redesigned video cards with gradient backgrounds
+
+🤖 Improved Ask AI
+• AI chat now responds reliably for WASH-related questions
+• Powered by advanced language model
+
+🎬 Splash Screen
+• Educational WASH video on app launch
+
+📹 Video Recording
+• 1 free trial for non-Pro users
+• 10 daily recordings for Pro subscribers (resets daily)
+
+---
+
+Upload key reset approved: Sep 8, 2026 at 10:59 AM UTC
+AAB path: app/build/outputs/bundle/release/app-release.aab
+Feature graphic: brand-assets/feature_graphic.png

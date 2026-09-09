@@ -18,8 +18,8 @@ android {
         applicationId = "com.sanitova.sanitovacheck"
         minSdk = 24
         targetSdk = 36
-        versionCode = 5
-        versionName = "1.1.0"
+        versionCode = 6
+        versionName = "1.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -100,9 +100,4 @@ dependencies {
     implementation("androidx.camera:camera-video:1.4.1")
     implementation("androidx.compose.material:material-icons-extended:1.7.5")
     implementation("io.coil-kt:coil-compose:2.6.0")
-
-    // ExoPlayer for splash video
-    implementation("androidx.media3:media3-exoplayer:1.4.1")
-    implementation("androidx.media3:media3-ui:1.4.1")
-    implementation("androidx.media3:media3-common:1.4.1")
 }

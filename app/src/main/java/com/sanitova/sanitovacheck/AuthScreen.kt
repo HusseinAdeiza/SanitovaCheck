@@ -48,10 +48,16 @@ fun AuthScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var resetSent by remember { mutableStateOf(false) }
+    var localError by remember { mutableStateOf<String?>(null) }
 
     // Auto-dismiss on success
     LaunchedEffect(currentUser) {
         if (currentUser != null) onAuthSuccess()
+    }
+
+    // Clear local error when auth error clears
+    LaunchedEffect(authError) {
+        if (authError == null) localError = null
     }
 
     // Google Sign-In launcher
@@ -67,19 +73,34 @@ fun AuthScreen(
                     AuthRepository.signInWithGoogle(idToken)
                     isLoading = false
                 }
+            } ?: run {
+                isLoading = false
+                localError = "Google sign-in failed. Please try again."
             }
         } catch (e: ApiException) {
             isLoading = false
+            localError = "Google sign-in cancelled or failed."
         }
     }
 
     fun launchGoogleSignIn() {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(context.getString(R.string.default_web_client_id))
-            .requestEmail()
-            .build()
-        val client = GoogleSignIn.getClient(context, gso)
-        googleSignInLauncher.launch(client.signInIntent)
+        try {
+            val webClientId = context.getString(R.string.default_web_client_id)
+            if (webClientId.isBlank() || webClientId == "YOUR_WEB_CLIENT_ID") {
+                localError = "Google Sign-In is not configured. Please use email/password instead."
+                return
+            }
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(webClientId)
+                .requestEmail()
+                .build()
+            val client = GoogleSignIn.getClient(context, gso)
+            isLoading = true
+            googleSignInLauncher.launch(client.signInIntent)
+        } catch (e: Exception) {
+            isLoading = false
+            localError = "Google Sign-In error: ${e.localizedMessage ?: "Unknown error"}"
+        }
     }
 
     Column(
@@ -121,7 +142,7 @@ fun AuthScreen(
         // Email field (all modes)
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it; AuthRepository.clearError() },
+            onValueChange = { email = it; AuthRepository.clearError(); localError = null },
             label = { Text("Email") },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,
@@ -137,7 +158,7 @@ fun AuthScreen(
         if (mode == AuthMode.SIGNUP) {
             OutlinedTextField(
                 value = displayName,
-                onValueChange = { displayName = it; AuthRepository.clearError() },
+                onValueChange = { displayName = it; AuthRepository.clearError(); localError = null },
                 label = { Text("Full name") },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth(),
@@ -150,7 +171,7 @@ fun AuthScreen(
         if (mode != AuthMode.RESET) {
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it; AuthRepository.clearError() },
+                onValueChange = { password = it; AuthRepository.clearError(); localError = null },
                 label = { Text("Password") },
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(
@@ -175,7 +196,7 @@ fun AuthScreen(
         if (mode == AuthMode.SIGNUP) {
             OutlinedTextField(
                 value = confirmPassword,
-                onValueChange = { confirmPassword = it; AuthRepository.clearError() },
+                onValueChange = { confirmPassword = it; AuthRepository.clearError(); localError = null },
                 label = { Text("Confirm password") },
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(
@@ -188,10 +209,11 @@ fun AuthScreen(
             Spacer(Modifier.height(12.dp))
         }
 
-        // Error display
-        authError?.let { error ->
+        // Error display (Firebase + local)
+        val errorToShow = localError ?: authError
+        if (errorToShow != null) {
             Text(
-                error,
+                errorToShow,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.fillMaxWidth(),
@@ -217,6 +239,7 @@ fun AuthScreen(
             onClick = {
                 isLoading = true
                 AuthRepository.clearError()
+                localError = null
                 scope.launch {
                     when (mode) {
                         AuthMode.LOGIN -> {
@@ -224,7 +247,7 @@ fun AuthScreen(
                         }
                         AuthMode.SIGNUP -> {
                             if (password != confirmPassword) {
-                                AuthRepository.signUp("", "", "") // trigger error via catch
+                                localError = "Passwords do not match"
                             } else {
                                 AuthRepository.signUp(email, password, displayName)
                             }
@@ -270,7 +293,14 @@ fun AuthScreen(
                 modifier = Modifier.fillMaxWidth().height(48.dp),
                 shape = RoundedCornerShape(14.dp)
             ) {
-                Text("Sign in with Google")
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text("Sign in with Google")
+                }
             }
             Spacer(Modifier.height(16.dp))
         }
@@ -282,7 +312,7 @@ fun AuthScreen(
                     "Forgot password?",
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.clickable { mode = AuthMode.RESET; AuthRepository.clearError() }
+                    modifier = Modifier.clickable { mode = AuthMode.RESET; AuthRepository.clearError(); localError = null }
                 )
                 Spacer(Modifier.height(8.dp))
                 Row {
@@ -292,7 +322,7 @@ fun AuthScreen(
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.clickable { mode = AuthMode.SIGNUP; AuthRepository.clearError() }
+                        modifier = Modifier.clickable { mode = AuthMode.SIGNUP; AuthRepository.clearError(); localError = null }
                     )
                 }
             }
@@ -304,7 +334,7 @@ fun AuthScreen(
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.clickable { mode = AuthMode.LOGIN; AuthRepository.clearError() }
+                        modifier = Modifier.clickable { mode = AuthMode.LOGIN; AuthRepository.clearError(); localError = null }
                     )
                 }
             }
@@ -316,7 +346,7 @@ fun AuthScreen(
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.clickable { mode = AuthMode.LOGIN; AuthRepository.clearError(); resetSent = false }
+                        modifier = Modifier.clickable { mode = AuthMode.LOGIN; AuthRepository.clearError(); localError = null; resetSent = false }
                     )
                 }
             }
