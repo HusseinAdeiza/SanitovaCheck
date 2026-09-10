@@ -17,6 +17,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -77,7 +79,23 @@ fun HomeScreen(
                 model = "https://images.unsplash.com/photo-1546531130-0f36255d9d49?fm=jpg&q=80&w=1200&auto=format&fit=crop",
                 contentDescription = "Clean water infrastructure",
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
+                placeholder = null,
+                error = null,
+                fallback = null
+            )
+            // Water gradient overlay so UI is always visible even if image fails
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                            )
+                        )
+                    )
             )
             Box(
                 modifier = Modifier

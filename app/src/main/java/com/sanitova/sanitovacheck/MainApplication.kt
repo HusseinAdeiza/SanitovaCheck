@@ -8,11 +8,18 @@ import com.revenuecat.purchases.LogLevel
 class MainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        Purchases.logLevel = LogLevel.DEBUG
+        Purchases.logLevel = LogLevel.WARN
         // Production API key, linked to the real Android app entry in RevenueCat.
-        Purchases.configure(
-            PurchasesConfiguration.Builder(this, "goog_yTBQQRvCNispVLUsLEjgDZrqSfM")
-                .build()
-        )
+        // Configure off the main thread to avoid any startup blocking.
+        Thread {
+            try {
+                Purchases.configure(
+                    PurchasesConfiguration.Builder(this, "goog_yTBQQRvCNispVLUsLEjgDZrqSfM")
+                        .build()
+                )
+            } catch (_: Exception) {
+                // Fail silently — subscription checks will just return no access
+            }
+        }.start()
     }
 }
