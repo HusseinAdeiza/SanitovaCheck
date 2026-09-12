@@ -108,6 +108,7 @@ fun ScanScreen(onScanComplete: (String) -> Unit, onRequirePro: () -> Unit) {
                 )
                 if (response.isSuccessful && response.body() != null) {
                     val result = response.body()!!
+                    android.util.Log.d("ScanScreen", "Assess response received. photoVerification=${result.photoVerification} matches=${result.photoVerification?.matches}")
                     ScanResultStore.lastResult.value = result
                     ScanResultStore.lastError.value = null
 

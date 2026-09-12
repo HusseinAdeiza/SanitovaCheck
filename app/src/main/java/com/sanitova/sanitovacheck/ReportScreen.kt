@@ -104,84 +104,87 @@ fun ReportScreen(scanId: String, onRequirePro: () -> Unit) {
                 }
             }
             Spacer(Modifier.height(12.dp))
+        }
 
-            result?.photoVerification?.let { verification ->
-                if (verification.matches != null) {
-                    val verifiedGood = verification.matches
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(
-                                if (verifiedGood) RiskLowBg else RiskHighBg
+        // Photo verification section — shown whenever the server returns
+        // photo verification data, regardless of whether local photo URIs
+        // are available.
+        result?.photoVerification?.let { verification ->
+            if (verification.matches != null || verification.aiObservedDescription != null) {
+                val verifiedGood = verification.matches == true
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            if (verifiedGood) RiskLowBg else RiskHighBg
+                        )
+                        .padding(12.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            if (verifiedGood) Icons.Filled.VerifiedUser else Icons.Filled.Warning,
+                            contentDescription = null,
+                            tint = if (verifiedGood) RiskLow else RiskHigh,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Column {
+                            Text(
+                                if (verifiedGood) "Photo matches description" else "⚠ PHOTO DOES NOT MATCH DESCRIPTION",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = if (verifiedGood) RiskLow else RiskHigh,
+                                fontWeight = FontWeight.Bold
                             )
-                            .padding(12.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                if (verifiedGood) Icons.Filled.VerifiedUser else Icons.Filled.Warning,
-                                contentDescription = null,
-                                tint = if (verifiedGood) RiskLow else RiskHigh,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Column {
+                            if (!verifiedGood) {
                                 Text(
-                                    if (verifiedGood) "Photo matches description" else "⚠ PHOTO DOES NOT MATCH DESCRIPTION",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = if (verifiedGood) RiskLow else RiskHigh,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                if (!verifiedGood) {
-                                    Text(
-                                        "This assessment is UNVERIFIED. The photo does not appear to match what was described.",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = RiskHigh,
-                                    )
-                                }
-                            }
-                        }
-
-                        // Show what the AI independently saw
-                        verification.aiObservedDescription?.let { observed ->
-                            if (observed.isNotBlank()) {
-                                Spacer(Modifier.height(8.dp))
-                                HorizontalDivider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
-                                Spacer(Modifier.height(8.dp))
-                                Text(
-                                    if (verifiedGood) "What the AI observed:" else "What the AI actually observed (differs from description):",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = if (verifiedGood) MaterialTheme.colorScheme.onSurfaceVariant else RiskHigh,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Spacer(Modifier.height(4.dp))
-                                Text(
-                                    observed,
+                                    "This assessment is UNVERIFIED. The photo does not appear to match what was described.",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = if (verifiedGood) MaterialTheme.colorScheme.onSurfaceVariant else RiskHigh,
-                                )
-                            }
-                        }
-
-                        // Show explanation
-                        verification.explanation?.let { expl ->
-                            if (expl.isNotBlank()) {
-                                Spacer(Modifier.height(6.dp))
-                                Text(
-                                    expl,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontStyle = FontStyle.Italic
+                                    color = RiskHigh,
                                 )
                             }
                         }
                     }
-                    Spacer(Modifier.height(8.dp))
-                }
-            }
 
-            Spacer(Modifier.height(8.dp))
+                    // Show what the AI independently saw
+                    verification.aiObservedDescription?.let { observed ->
+                        if (observed.isNotBlank()) {
+                            Spacer(Modifier.height(8.dp))
+                            HorizontalDivider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                if (verifiedGood) "What the AI observed:" else "What the AI actually observed (differs from description):",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = if (verifiedGood) MaterialTheme.colorScheme.onSurfaceVariant else RiskHigh,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                observed,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (verifiedGood) MaterialTheme.colorScheme.onSurfaceVariant else RiskHigh,
+                            )
+                        }
+                    }
+
+                    // Show explanation
+                    verification.explanation?.let { expl ->
+                        if (expl.isNotBlank()) {
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                expl,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontStyle = FontStyle.Italic
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+            }
         }
+
+        Spacer(Modifier.height(8.dp))
 
         if (result == null) {
             Card(
@@ -200,6 +203,7 @@ fun ReportScreen(scanId: String, onRequirePro: () -> Unit) {
         val routing = result!!.routing
         val style = riskStyleFor(assessment.riskLevel)
         val photoMismatched = result!!.photoVerification?.matches == false
+        val hasPhotoVerification = result!!.photoVerification?.matches != null || result!!.photoVerification?.aiObservedDescription != null
 
         // Risk level hero card
         Card(
