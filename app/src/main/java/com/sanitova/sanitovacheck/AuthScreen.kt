@@ -1,7 +1,5 @@
 package com.sanitova.sanitovacheck
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,9 +20,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.GetCredentialResponse
+import androidx.credentials.exceptions.GetCredentialException
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.sanitova.sanitovacheck.ui.theme.*
 import kotlinx.coroutines.launch
 
@@ -60,46 +61,84 @@ fun AuthScreen(
         if (authError == null) localError = null
     }
 
-    // Google Sign-In launcher
-    val googleSignInLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)
-            account?.idToken?.let { idToken ->
-                isLoading = true
-                scope.launch {
-                    AuthRepository.signInWithGoogle(idToken)
-                    isLoading = false
-                }
-            } ?: run {
-                isLoading = false
-                localError = "Google sign-in failed. Please try again."
-            }
-        } catch (e: ApiException) {
-            isLoading = false
-            localError = "Google sign-in cancelled or failed."
-        }
-    }
+    // Credential Manager instance (modern Google Sign-In)
+    val credentialManager = remember { CredentialManager.create(context) }
 
     fun launchGoogleSignIn() {
-        try {
-            val webClientId = context.getString(R.string.default_web_client_id)
-            if (webClientId.isBlank() || webClientId == "YOUR_WEB_CLIENT_ID") {
-                localError = "Google Sign-In is not configured. Please use email/password instead."
-                return
+        val webClientId = context.getString(R.string.default_web_client_id)
+        if (webClientId.isBlank() || webClientId == "YOUR_WEB_CLIENT_ID") {
+            localError = "Google Sign-In is not configured. Please use email/password instead."
+            return
+        }
+
+        val googleIdOption = com.google.android.libraries.identity.googleid.GetGoogleIdOption.Builder()
+            .setServerClientId(webClientId)
+            .setFilterByAuthorizedAccounts(false)
+            .setAutoSelectEnabled(false)
+            .build()
+
+        val request = GetCredentialRequest.Builder()
+            .addCredentialOption(googleIdOption)
+            .build()
+
+        isLoading = true
+        localError = null
+        AuthRepository.clearError()
+
+        scope.launch {
+            try {
+                val result = credentialManager.getCredential(
+                    request = request,
+                    context = context,
+                )
+                val credential = result.credential
+                val idToken = when (credential) {
+                    is androidx.credentials.PasswordCredential -> {
+                        isLoading = false
+                        localError = "Password credentials are not supported. Please use your Google account."
+                        return@launch
+                    }
+                    is androidx.credentials.CustomCredential -> {
+                        if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                            try {
+                                val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                                googleIdTokenCredential.idToken
+                            } catch (e: GoogleIdTokenParsingException) {
+                                isLoading = false
+                                localError = "Failed to parse Google credential. Please try again."
+                                return@launch
+                            }
+                        } else {
+                            isLoading = false
+                            localError = "Unsupported credential type. Please try again."
+                            return@launch
+                        }
+                    }
+                    else -> {
+                        isLoading = false
+                        localError = "Unexpected credential type. Please try again."
+                        return@launch
+                    }
+                }
+
+                // Sign in to Firebase with the Google ID token
+                AuthRepository.signInWithGoogle(idToken)
+                isLoading = false
+            } catch (e: GetCredentialException) {
+                isLoading = false
+                localError = when {
+                    e is androidx.credentials.exceptions.NoCredentialException ->
+                        "No Google accounts found. Please add a Google account to your device or use email/password."
+                    e is androidx.credentials.exceptions.GetCredentialCancellationException ->
+                        "Google sign-in was cancelled."
+                    e is androidx.credentials.exceptions.GetCredentialProviderConfigurationException ->
+                        "Google Play Services is not available. Please use email/password."
+                    else -> "Google sign-in failed. Please try email/password instead."
+                }
+            } catch (e: Exception) {
+                isLoading = false
+                localError = "Google sign-in error: ${e.localizedMessage ?: "Unknown error"}"
             }
-            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(webClientId)
-                .requestEmail()
-                .build()
-            val client = GoogleSignIn.getClient(context, gso)
-            isLoading = true
-            googleSignInLauncher.launch(client.signInIntent)
-        } catch (e: Exception) {
-            isLoading = false
-            localError = "Google Sign-In error: ${e.localizedMessage ?: "Unknown error"}"
         }
     }
 

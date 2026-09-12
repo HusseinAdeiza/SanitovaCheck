@@ -18,8 +18,8 @@ android {
         applicationId = "com.sanitova.sanitovacheck"
         minSdk = 24
         targetSdk = 36
-        versionCode = 7
-        versionName = "1.1.2"
+        versionCode = 8
+        versionName = "1.1.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -89,6 +89,11 @@ dependencies {
     // RevenueCat
     implementation("com.revenuecat.purchases:purchases:10.1.0")
     implementation("com.revenuecat.purchases:purchases-ui:10.1.0")
+
+    // Credential Manager (modern Google Sign-In)
+    implementation("androidx.credentials:credentials:1.5.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.5.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.8.0")

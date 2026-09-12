@@ -66,6 +66,12 @@
 -keep class androidx.media3.** { *; }
 -dontwarn androidx.media3.**
 
+# Credential Manager (Google Sign-In)
+-keep class androidx.credentials.** { *; }
+-keep class com.google.android.libraries.identity.** { *; }
+-dontwarn androidx.credentials.**
+-dontwarn com.google.android.libraries.identity.**
+
 # Prevent R8 from stripping model classes
 -keep class com.sanitova.sanitovacheck.AssessRequest { *; }
 -keep class com.sanitova.sanitovacheck.AssessResponse { *; }
