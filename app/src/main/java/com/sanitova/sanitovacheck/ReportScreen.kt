@@ -20,6 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.sanitova.sanitovacheck.ui.theme.*
@@ -111,49 +113,65 @@ fun ReportScreen(scanId: String, onRequirePro: () -> Unit) {
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
                             .background(
-                                if (verifiedGood) RiskLowBg else RiskMediumBg
+                                if (verifiedGood) RiskLowBg else RiskHighBg
                             )
                             .padding(12.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                if (verifiedGood) Icons.Filled.VerifiedUser else Icons.Filled.ReportProblem,
+                                if (verifiedGood) Icons.Filled.VerifiedUser else Icons.Filled.Warning,
                                 contentDescription = null,
-                                tint = if (verifiedGood) RiskLow else RiskMedium,
-                                modifier = Modifier.size(20.dp)
+                                tint = if (verifiedGood) RiskLow else RiskHigh,
+                                modifier = Modifier.size(24.dp)
                             )
                             Spacer(Modifier.width(8.dp))
                             Column {
                                 Text(
-                                    if (verifiedGood) "Photo matches description" else "Photo may not match description",
+                                    if (verifiedGood) "Photo matches description" else "⚠ PHOTO DOES NOT MATCH DESCRIPTION",
                                     style = MaterialTheme.typography.labelLarge,
-                                    color = if (verifiedGood) RiskLow else RiskMedium
+                                    color = if (verifiedGood) RiskLow else RiskHigh,
+                                    fontWeight = FontWeight.Bold
                                 )
-                                verification.explanation?.let {
+                                if (!verifiedGood) {
                                     Text(
-                                        it,
+                                        "This assessment is UNVERIFIED. The photo does not appear to match what was described.",
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = RiskHigh,
                                     )
                                 }
                             }
                         }
-                        // Show what the AI independently saw, especially
-                        // important when it disagrees with the user's text
-                        if (!verifiedGood) {
-                            verification.aiObservedDescription?.let { observed ->
+
+                        // Show what the AI independently saw
+                        verification.aiObservedDescription?.let { observed ->
+                            if (observed.isNotBlank()) {
                                 Spacer(Modifier.height(8.dp))
                                 HorizontalDivider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
                                 Spacer(Modifier.height(8.dp))
                                 Text(
-                                    "What the AI actually observed:",
+                                    if (verifiedGood) "What the AI observed:" else "What the AI actually observed (differs from description):",
                                     style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = if (verifiedGood) MaterialTheme.colorScheme.onSurfaceVariant else RiskHigh,
+                                    fontWeight = FontWeight.Bold
                                 )
+                                Spacer(Modifier.height(4.dp))
                                 Text(
                                     observed,
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = if (verifiedGood) MaterialTheme.colorScheme.onSurfaceVariant else RiskHigh,
+                                )
+                            }
+                        }
+
+                        // Show explanation
+                        verification.explanation?.let { expl ->
+                            if (expl.isNotBlank()) {
+                                Spacer(Modifier.height(6.dp))
+                                Text(
+                                    expl,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontStyle = FontStyle.Italic
                                 )
                             }
                         }
@@ -181,29 +199,44 @@ fun ReportScreen(scanId: String, onRequirePro: () -> Unit) {
         val assessment = result!!.assessment
         val routing = result!!.routing
         val style = riskStyleFor(assessment.riskLevel)
+        val photoMismatched = result!!.photoVerification?.matches == false
 
         // Risk level hero card
         Card(
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = style.bg),
+            colors = CardDefaults.cardColors(containerColor = if (photoMismatched) RiskHighBg else style.bg),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(style.icon, contentDescription = null, tint = style.color, modifier = Modifier.size(28.dp))
+                    Icon(
+                        if (photoMismatched) Icons.Filled.Warning else style.icon,
+                        contentDescription = null,
+                        tint = if (photoMismatched) RiskHigh else style.color,
+                        modifier = Modifier.size(28.dp)
+                    )
                     Spacer(Modifier.width(10.dp))
                     Text(
-                        "${assessment.riskLevel.uppercase()} RISK",
+                        if (photoMismatched) "UNVERIFIED ASSESSMENT" else "${assessment.riskLevel.uppercase()} RISK",
                         style = MaterialTheme.typography.headlineSmall,
-                        color = style.color
+                        color = if (photoMismatched) RiskHigh else style.color,
+                        fontWeight = FontWeight.Bold
                     )
                 }
                 Spacer(Modifier.height(6.dp))
-                Text(
-                    "Risk Score: ${assessment.riskScore} / 10",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = style.color
-                )
+                if (photoMismatched) {
+                    Text(
+                        "The photo does not match the description. Assessment based on text only — not verified against photo evidence.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = RiskHigh
+                    )
+                } else {
+                    Text(
+                        "Risk Score: ${assessment.riskScore} / 10",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = style.color
+                    )
+                }
             }
         }
 
