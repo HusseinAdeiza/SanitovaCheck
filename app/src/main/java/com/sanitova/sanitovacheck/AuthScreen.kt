@@ -122,22 +122,35 @@ fun AuthScreen(
                 }
 
                 // Sign in to Firebase with the Google ID token
-                AuthRepository.signInWithGoogle(idToken)
+                val signInResult = AuthRepository.signInWithGoogle(idToken)
                 isLoading = false
+                if (signInResult.isFailure) {
+                    // friendlyAuthError already stored the message in authError
+                    localError = null
+                }
             } catch (e: GetCredentialException) {
                 isLoading = false
-                localError = when {
-                    e is androidx.credentials.exceptions.NoCredentialException ->
-                        "No Google accounts found. Please add a Google account to your device or use email/password."
-                    e is androidx.credentials.exceptions.GetCredentialCancellationException ->
-                        "Google sign-in was cancelled."
-                    e is androidx.credentials.exceptions.GetCredentialProviderConfigurationException ->
-                        "Google Play Services is not available. Please use email/password."
-                    else -> "Google sign-in failed. Please try email/password instead."
+                // Cancelling the account picker is a deliberate user action, not a
+                // failure. Showing a red error for it is confusing and alarming.
+                if (e is androidx.credentials.exceptions.GetCredentialCancellationException) {
+                    localError = null
+                    AuthRepository.clearError()
+                } else {
+                    localError = when {
+                        // NoCredentialException is thrown when the picker fails to
+                        // load, not only when there is genuinely no account. Saying
+                        // "no Google account found" to someone who has one is a dead
+                        // end, so point them at both paths.
+                        e is androidx.credentials.exceptions.NoCredentialException ->
+                            "Couldn't open Google sign-in. Check your internet connection and make sure a Google account is on this device, or use email and password below."
+                        e is androidx.credentials.exceptions.GetCredentialProviderConfigurationException ->
+                            "Google Play Services isn't available on this device. Please use email and password instead."
+                        else -> "Google sign-in didn't work. Please use email and password instead."
+                    }
                 }
             } catch (e: Exception) {
                 isLoading = false
-                localError = "Google sign-in error: ${e.localizedMessage ?: "Unknown error"}"
+                localError = AuthRepository.friendlyAuthError(e)
             }
         }
     }
@@ -282,13 +295,13 @@ fun AuthScreen(
                 scope.launch {
                     when (mode) {
                         AuthMode.LOGIN -> {
-                            AuthRepository.signIn(email, password)
+                            AuthRepository.signIn(email.trim(), password)
                         }
                         AuthMode.SIGNUP -> {
                             if (password != confirmPassword) {
                                 localError = "Passwords do not match"
                             } else {
-                                AuthRepository.signUp(email, password, displayName)
+                                AuthRepository.signUp(email.trim(), password, displayName.trim())
                             }
                         }
                         AuthMode.RESET -> {

@@ -26,10 +26,17 @@ object WashApiClient {
 
     private const val BASE_URL = "https://wash-risk-agent-hwfcbnykfb.ap-southeast-1.fcapp.run/"
 
+    // The AI endpoints (assess, chat) call a large model and can take well over
+    // 20s to produce a full answer. The original 20s read timeout cut those
+    // responses off mid-generation and surfaced a misleading "request timed
+    // out" to the user. Short prompts still return in a few seconds, so a
+    // longer timeout costs nothing on the fast path.
     private val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(10, TimeUnit.SECONDS)
-        .readTimeout(20, TimeUnit.SECONDS)
-        .writeTimeout(15, TimeUnit.SECONDS)
+        .connectTimeout(15, TimeUnit.SECONDS)
+        .readTimeout(90, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .callTimeout(120, TimeUnit.SECONDS)
+        .retryOnConnectionFailure(true)
         .build()
 
     val service: WashApiService by lazy {

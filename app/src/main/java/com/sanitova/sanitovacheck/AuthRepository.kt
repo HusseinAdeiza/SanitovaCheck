@@ -35,11 +35,54 @@ object AuthRepository {
     init {
         auth.addAuthStateListener { firebaseAuth ->
             _currentUser.value = firebaseAuth.currentUser
+            // Keep the RevenueCat customer tied to the Firebase account so a
+            // purchase restores on sign-in instead of staying anonymous.
+            SubscriptionRepository.syncUserIdentity(firebaseAuth.currentUser?.uid)
         }
     }
 
     fun clearError() {
         _authError.value = null
+    }
+
+    /**
+     * Maps raw Firebase / network exceptions to short, user-friendly messages.
+     * Raw strings like "An internal error has occurred. [ Failed to connect to
+     * www.googleapis.com/... ]" confuse users; this turns them into actionable text.
+     */
+    fun friendlyAuthError(e: Exception): String {
+        val raw = (e.localizedMessage ?: e.message ?: "").lowercase()
+        val isIo = e is java.io.IOException || e.cause is java.io.IOException
+        return when {
+            isIo ||
+            raw.contains("failed to connect") ||
+            raw.contains("unable to resolve host") ||
+            raw.contains("no address associated") ||
+            raw.contains("network error") ||
+            raw.contains("timeout") ||
+            raw.contains("socket") ||
+            raw.contains("connection reset") ->
+                "No internet connection. Check your Wi-Fi or mobile data, then try again."
+            raw.contains("already in use") ->
+                "An account with this email already exists. Use Sign in instead."
+            raw.contains("invalid email") || raw.contains("badly formatted") ->
+                "That email address doesn't look valid. Please check it and try again."
+            raw.contains("weak password") ->
+                "Password is too weak. Use at least 6 characters."
+            raw.contains("password is invalid") ||
+            raw.contains("wrong password") ||
+            raw.contains("incorrect") ||
+            raw.contains("malformed") ||
+            raw.contains("credential") ->
+                "Incorrect email or password. Please check them and try again."
+            raw.contains("no user record") ->
+                "No account found for this email. Please create an account first."
+            raw.contains("too many requests") ->
+                "Too many attempts. Please wait a minute and try again."
+            raw.contains("not allowed") || raw.contains("disabled") ->
+                "This sign-in method isn't available right now. Please contact support."
+            else -> e.localizedMessage ?: "Something went wrong. Please try again."
+        }
     }
 
     /** Sign up with email and password. */
@@ -54,7 +97,7 @@ object AuthRepository {
             }
             Result.success(result.user!!)
         } catch (e: Exception) {
-            _authError.value = e.localizedMessage ?: "Sign up failed"
+            _authError.value = friendlyAuthError(e)
             Result.failure(e)
         }
     }
@@ -65,7 +108,7 @@ object AuthRepository {
             val result = auth.signInWithEmailAndPassword(email, password).await()
             Result.success(result.user!!)
         } catch (e: Exception) {
-            _authError.value = e.localizedMessage ?: "Sign in failed"
+            _authError.value = friendlyAuthError(e)
             Result.failure(e)
         }
     }
@@ -77,7 +120,7 @@ object AuthRepository {
             val result = auth.signInWithCredential(credential).await()
             Result.success(result.user!!)
         } catch (e: Exception) {
-            _authError.value = e.localizedMessage ?: "Google sign-in failed"
+            _authError.value = friendlyAuthError(e)
             Result.failure(e)
         }
     }
@@ -88,7 +131,7 @@ object AuthRepository {
             auth.sendPasswordResetEmail(email).await()
             Result.success(Unit)
         } catch (e: Exception) {
-            _authError.value = e.localizedMessage ?: "Failed to send reset email"
+            _authError.value = friendlyAuthError(e)
             Result.failure(e)
         }
     }

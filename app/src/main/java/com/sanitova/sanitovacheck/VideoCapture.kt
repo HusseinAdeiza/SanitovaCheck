@@ -12,7 +12,9 @@ import androidx.camera.video.Recording
 import androidx.camera.video.VideoCapture
 import androidx.camera.video.VideoRecordEvent
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -50,6 +52,7 @@ fun VideoCapture(
     var recording by remember { mutableStateOf<Recording?>(null) }
     var isRecording by remember { mutableStateOf(false) }
     var elapsedSeconds by remember { mutableStateOf(0) }
+    var cameraError by remember { mutableStateOf<String?>(null) }
 
     fun stopRecording() {
         recording?.stop()
@@ -87,7 +90,16 @@ fun VideoCapture(
                             capture
                         )
                     } catch (e: Exception) {
-                        // TODO: surface a user-facing error if camera binding fails
+                        // Surface this — a silent failure leaves a black screen and a
+                        // record button that does nothing.
+                        cameraError = when {
+                            e is SecurityException ->
+                                "Camera permission was denied. Enable it in Settings to record a video."
+                            e is IllegalArgumentException ->
+                                "No rear camera is available on this device."
+                            else ->
+                                "Couldn't start the camera. Close other apps using it and try again."
+                        }
                     }
                 }, ContextCompat.getMainExecutor(ctx))
 
@@ -134,8 +146,12 @@ fun VideoCapture(
             contentAlignment = Alignment.Center
         ) {
             Button(
+                enabled = cameraError == null,
                 onClick = onClick@{
-                    val capture = videoCapture ?: return@onClick
+                    val capture = videoCapture ?: run {
+                        cameraError = "Camera isn't ready yet. Wait a moment and try again."
+                        return@onClick
+                    }
                     if (isRecording) {
                         stopRecording()
                         return@onClick
@@ -157,6 +173,9 @@ fun VideoCapture(
                                 isRecording = false
                                 if (!event.hasError()) {
                                     onVideoCaptured(Uri.fromFile(videoFile))
+                                } else {
+                                    // Don't leave the user waiting on a clip that will never arrive.
+                                    cameraError = "The video couldn't be recorded. Please try again."
                                 }
                             }
                         }
@@ -171,6 +190,32 @@ fun VideoCapture(
                 }
             ) {
                 Text(if (isRecording) "Stop Recording" else "Record Video (max ${MAX_RECORDING_SECONDS}s)")
+            }
+
+            // Surface camera/recording problems instead of a silent dead screen.
+            cameraError?.let { err ->
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .windowInsetsPadding(WindowInsets.statusBars)
+                        .padding(top = 56.dp, start = 24.dp, end = 24.dp)
+                        .background(
+                            MaterialTheme.colorScheme.error.copy(alpha = 0.92f),
+                            RoundedCornerShape(12.dp)
+                        )
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        err,
+                        color = MaterialTheme.colorScheme.onError,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    TextButton(onClick = { cameraError = null }) {
+                        Text("Try again", color = MaterialTheme.colorScheme.onError)
+                    }
+                }
             }
         }
     }

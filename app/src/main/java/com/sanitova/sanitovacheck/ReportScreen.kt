@@ -285,22 +285,32 @@ fun ReportScreen(scanId: String, onRequirePro: () -> Unit) {
 
         Button(
             onClick = {
+                // result is smart-cast non-null here — the screen returns early above
+                // when it is null, so no null check is needed.
                 val currentResult = result
-                if (currentResult == null) {
-                    // no-op, nothing to export
-                } else if (hasProAccess || !PdfExportTracker.hasReachedLimit(context)) {
+                if (hasProAccess || !PdfExportTracker.hasReachedLimit(context)) {
                     if (!hasProAccess) {
                         PdfExportTracker.increment(context)
                     }
-                    val pdfUri = PdfReportGenerator.generate(context, scanId, currentResult)
-                    val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                        type = "application/pdf"
-                        putExtra(android.content.Intent.EXTRA_STREAM, pdfUri)
-                        addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    // generate() writes a file and resolves a FileProvider Uri; it
+                    // can throw on IO failure. Don't crash the screen over an export.
+                    try {
+                        val pdfUri = PdfReportGenerator.generate(context, scanId, currentResult)
+                        val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                            type = "application/pdf"
+                            putExtra(android.content.Intent.EXTRA_STREAM, pdfUri)
+                            addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                        context.startActivity(
+                            android.content.Intent.createChooser(shareIntent, "Share Compliance Report")
+                        )
+                    } catch (e: Exception) {
+                        android.widget.Toast.makeText(
+                            context,
+                            "Couldn't create the PDF report. Please try again.",
+                            android.widget.Toast.LENGTH_LONG
+                        ).show()
                     }
-                    context.startActivity(
-                        android.content.Intent.createChooser(shareIntent, "Share Compliance Report")
-                    )
                 } else {
                     onRequirePro()
                 }

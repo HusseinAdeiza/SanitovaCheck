@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
     <cache-path name="pdf_reports" path="." />
+    <files-path name="generated_reports" path="reports/" />
+    <external-files-path name="external_reports" path="reports/" />
+    <external-files-path name="captured_scans" path="scans/" />
+    <external-files-path name="video_frames" path="video_frames/" />
 </paths>

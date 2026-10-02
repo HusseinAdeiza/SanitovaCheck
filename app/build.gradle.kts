@@ -18,8 +18,8 @@ android {
         applicationId = "com.sanitova.sanitovacheck"
         minSdk = 24
         targetSdk = 36
-        versionCode = 8
-        versionName = "1.1.3"
+        versionCode = 10
+        versionName = "1.1.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

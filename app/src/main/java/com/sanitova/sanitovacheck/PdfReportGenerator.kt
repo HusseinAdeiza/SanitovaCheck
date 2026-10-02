@@ -128,7 +128,12 @@ object PdfReportGenerator {
         document.finishPage(page)
 
         val fileName = "SanitovaCheck_Report_$caseId.pdf"
-        val file = File(context.cacheDir, fileName)
+        // Write to external files dir, not cacheDir. Cache can be reclaimed by
+        // the system at any time — including while the share sheet is still open,
+        // which would hand the receiving app a dead file.
+        val dir = File(context.getExternalFilesDir(null) ?: context.filesDir, "reports")
+        if (!dir.exists()) dir.mkdirs()
+        val file = File(dir, fileName)
         FileOutputStream(file).use { out ->
             document.writeTo(out)
         }

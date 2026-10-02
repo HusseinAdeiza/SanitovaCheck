@@ -76,7 +76,9 @@ fun extractVideoFrames(context: Context, videoUri: Uri, frameCount: Int = 6): Li
             val timeUs = stepMs * i * 1000L
             val frame = retriever.getFrameAtTime(timeUs, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
                 ?: return@mapNotNull null
-            val file = File(context.cacheDir, "video_frame_${System.currentTimeMillis()}_$i.jpg")
+            val dir = File(context.getExternalFilesDir(null) ?: context.filesDir, "video_frames")
+            if (!dir.exists()) dir.mkdirs()
+            val file = File(dir, "video_frame_${System.currentTimeMillis()}_$i.jpg")
             FileOutputStream(file).use { out -> frame.compress(Bitmap.CompressFormat.JPEG, 85, out) }
             Uri.fromFile(file)
         }
