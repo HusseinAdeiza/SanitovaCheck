@@ -9,10 +9,15 @@
 /.idea/assetWizardSettings.xml
 .DS_Store
 /build
+/app/build
 /captures
 .externalNativeBuild
 .cxx
 local.properties
+
+# IDE
+/.idea/*
+!/.idea/.gitignore
 
 # Firebase & Google Services
 app/google-services.json
@@ -22,3 +27,7 @@ app/src/*/res/values/secrets.xml
 *.jks
 *.keystore
 keystore.properties
+
+# Credentials — NEVER commit these
+upload-certificate.txt
+*.pem
